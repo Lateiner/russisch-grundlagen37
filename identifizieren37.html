@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Russisch: Odd One Out (10 Beispiele)</title>
+    <style>
+        :root {
+            --primary: #3498db;
+            --primary-dark: #2980b9;
+            --success: #2ecc71;
+            --error: #e74c3c;
+            --bg-light: #f4f6f8;
+            --text-color: #333;
+            --border-radius: 12px;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #eef2f5;
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+
+        h1 {
+            color: var(--primary-dark);
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 1.8rem;
+        }
+
+        .intro {
+            background-color: #e3f2fd;
+            border-left: 5px solid var(--primary);
+            padding: 15px;
+            margin-bottom: 30px;
+            border-radius: 4px;
+        }
+
+        /* Status Bar (Progress) */
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            background: #f8f9fa;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: bold;
+            color: #555;
+            border: 1px solid #eee;
+        }
+
+        /* Question Group Styles */
+        .question-group {
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .question-group:last-child {
+            border-bottom: none;
+        }
+
+        .question-title {
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #555;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .options-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        /* Interactive Option Cards */
+        .option-btn {
+            flex: 1 1 calc(25% - 10px); /* Desktop: 4 items per row */
+            min-width: 130px; /* Mobile safety width */
+            background-color: var(--bg-light);
+            border: 2px solid transparent;
+            border-radius: 8px;
+            padding: 15px 10px;
+            text-align: center;
+            cursor: pointer;
+            font-size: 1.1rem;
+            color: #444;
+            transition: all 0.2s ease;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            position: relative;
+        }
+
+        .option-btn:hover:not(.disabled) {
+            background-color: #dfe6e9;
+            transform: translateY(-2px);
+        }
+
+        /* States */
+        .option-btn.correct {
+            background-color: var(--success) !important;
+            color: white !important;
+            border-color: #27ae60 !important;
+            pointer-events: none; /* Keine weiteren Klicks möglich */
+        }
+
+        .option-btn.wrong {
+            background-color: var(--error) !important;
+            color: white !important;
+            border-color: #c0392b !important;
+            opacity: 0.8;
+            pointer-events: none; /* Keine weiteren Klicks auf DIESEN falschen Button */
+        }
+
+        .option-btn.disabled {
+            pointer-events: none;
+            opacity: 0.5;
+        }
+
+        /* Animations */
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            50% { transform: translateX(5px); }
+            75% { transform: translateX(-5px); }
+            100% { transform: translateX(0); }
+        }
+
+        .shake {
+            animation: shake 0.4s ease-in-out;
+        }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            color: white;
+            transition: background 0.3s;
+            min-width: 150px;
+        }
+
+        .btn-reset { background-color: #95a5a6; }
+        .btn-reset:hover { background-color: #7f8c8d; }
+
+        .btn-solve { background-color: #f39c12; }
+        .btn-solve:hover { background-color: #d35400; }
+
+        /* Responsive Adjustments */
+        @media (max-width: 600px) {
+            .container { padding: 15px; }
+            .option-btn {
+                flex: 1 1 100%; /* Mobile: Full width stack */
+                margin-bottom: 5px;
+            }
+            .controls { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Odd One Out: Partizipien</h1>
+    
+    <div class="intro">
+        <strong>Aufgabe:</strong> Finden Sie das „Kuckucksei“! <br>
+        In jeder Reihe gibt es vier Wörter. Nur <strong>eines</strong> davon ist ein <strong>aktives Partizip der Vergangenheit</strong>.<br>
+        Tippen Sie auf das Wort. Sie erhalten sofort Feedback.
+    </div>
+
+    <div class="status-bar">
+        <span>Fortschritt: <span id="progress-text">0 / 10</span></span>
+        <span id="completion-msg" style="color: var(--success); display:none;">Geschafft!</span>
+    </div>
+
+    <div id="quiz-container">
+        <!-- Fragen werden per JavaScript hier eingefügt -->
+    </div>
+
+    <div class="controls">
+        <button class="action-btn btn-reset" onclick="resetQuiz()">Zurücksetzen</button>
+        <button class="action-btn btn-solve" onclick="showSolution()">Lösung anzeigen</button>
+    </div>
+</div>
+
+<script>
+    const questions = [
+        {
+            id: 1,
+            label: "Basisform (Vokalstamm)",
+            options: ["читал", "читать", "читавший", "читающий"],
+            correctIndex: 2
+        },
+        {
+            id: 2,
+            label: "Konsonantenstamm (-ш-)",
+            options: ["нёс", "несущий", "нести", "нёсший"],
+            correctIndex: 3
+        },
+        {
+            id: 3,
+            label: "Reflexives Verb (-ся)",
+            options: ["вернувшийся", "вернулся", "вернуться", "вернётся"],
+            correctIndex: 0
+        },
+        {
+            id: 4,
+            label: "Aspekt (Vollendet)",
+            options: ["сделал", "сделавший", "сделать", "делающий"],
+            correctIndex: 1
+        },
+        {
+            id: 5,
+            label: "Unregelmäßiges Verb (gehen)",
+            options: ["шёл", "идти", "идущий", "шедший"],
+            correctIndex: 3
+        },
+        {
+            id: 6,
+            label: "Verwechslung mit Passiv",
+            options: ["открытый", "открывший", "открыл", "откроет"],
+            correctIndex: 1
+        },
+        {
+            id: 7,
+            label: "Verb 'lieben' (Vokalstamm)",
+            options: ["любимый", "любит", "любивший", "любил"],
+            correctIndex: 2
+        },
+        {
+            id: 8,
+            label: "Unregelmäßig (sterben)",
+            options: ["умирающий", "умер", "умереть", "умерший"],
+            correctIndex: 3
+        },
+        {
+            id: 9,
+            label: "Verb 'sehen' (Vollendet)",
+            options: ["видел", "увидевший", "увидит", "увидеть"],
+            correctIndex: 1
+        },
+        {
+            id: 10,
+            label: "Verb 'trinken' (einsilbig)",
+            options: ["пил", "пьющий", "пивший", "пить"],
+            correctIndex: 2
+        }
+    ];
+
+    const quizContainer = document.getElementById('quiz-container');
+    const progressText = document.getElementById('progress-text');
+    const completionMsg = document.getElementById('completion-msg');
+
+    let correctAnswersCount = 0;
+
+    function initQuiz() {
+        quizContainer.innerHTML = '';
+        correctAnswersCount = 0;
+        updateProgress();
+
+        questions.forEach((q, qIndex) => {
+            const group = document.createElement('div');
+            group.className = 'question-group';
+            group.dataset.id = qIndex;
+
+            const title = document.createElement('div');
+            title.className = 'question-title';
+            title.textContent = `${qIndex + 1}. ${q.label}`;
+            group.appendChild(title);
+
+            const grid = document.createElement('div');
+            grid.className = 'options-grid';
+
+            q.options.forEach((optText, optIndex) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.textContent = optText;
+                
+                // Event Listener für sofortiges Feedback
+                btn.onclick = () => handleSelection(btn, qIndex, optIndex);
+
+                grid.appendChild(btn);
+            });
+
+            group.appendChild(grid);
+            quizContainer.appendChild(group);
+        });
+    }
+
+    function handleSelection(btn, qIndex, optIndex) {
+        const question = questions[qIndex];
+        const group = quizContainer.children[qIndex];
+        const buttons = group.querySelectorAll('.option-btn');
+
+        if (optIndex === question.correctIndex) {
+            // Richtig
+            btn.classList.add('correct');
+            btn.textContent += " ✔"; // Visuelles Häkchen
+            
+            // Andere Buttons in dieser Reihe deaktivieren
+            buttons.forEach(b => b.classList.add('disabled'));
+            
+            // Fortschritt erhöhen
+            correctAnswersCount++;
+            updateProgress();
+        } else {
+            // Falsch
+            btn.classList.add('wrong');
+            btn.classList.add('shake'); // Wackel-Effekt
+            
+            // "Shake" Klasse entfernen nach Animation, damit es bei erneutem Klick wieder wackeln könnte (falls Logik geändert wird)
+            setTimeout(() => btn.classList.remove('shake'), 500);
+        }
+    }
+
+    function updateProgress() {
+        progressText.textContent = `${correctAnswersCount} / ${questions.length}`;
+        if (correctAnswersCount === questions.length) {
+            completionMsg.style.display = 'inline';
+        } else {
+            completionMsg.style.display = 'none';
+        }
+    }
+
+    function resetQuiz() {
+        initQuiz();
+    }
+
+    function showSolution() {
+        // Erst resetten, um sauberen Zustand zu haben
+        quizContainer.innerHTML = '';
+        correctAnswersCount = questions.length;
+        updateProgress();
+
+        questions.forEach((q, qIndex) => {
+            const group = document.createElement('div');
+            group.className = 'question-group';
+
+            const title = document.createElement('div');
+            title.className = 'question-title';
+            title.textContent = `${qIndex + 1}. ${q.label}`;
+            group.appendChild(title);
+
+            const grid = document.createElement('div');
+            grid.className = 'options-grid';
+
+            q.options.forEach((optText, optIndex) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn disabled'; // Alle inaktiv
+                btn.textContent = optText;
+
+                if (optIndex === q.correctIndex) {
+                    btn.classList.remove('disabled');
+                    btn.classList.add('correct'); // Nur der Richtige grün
+                    btn.textContent += " ✔";
+                }
+
+                grid.appendChild(btn);
+            });
+
+            group.appendChild(grid);
+            quizContainer.appendChild(group);
+        });
+    }
+
+    // App Start
+    initQuiz();
+
+</script>
+
+</body>
+</html>
