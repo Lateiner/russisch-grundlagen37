@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Russisch: Kasus Multiple Choice</title>
+    <style>
+        :root {
+            --primary: #3498db;
+            --primary-dark: #2980b9;
+            --success: #2ecc71;
+            --error: #e74c3c;
+            --bg: #f4f7f6;
+            --card-bg: #ffffff;
+            --text: #34495e;
+            --border-radius: 12px;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: var(--primary-dark);
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .intro {
+            background-color: #e8f4fd;
+            border-left: 5px solid var(--primary);
+            padding: 15px;
+            margin-bottom: 30px;
+            border-radius: 4px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            background-color: #e0e0e0;
+            border-radius: 10px;
+            height: 10px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background-color: var(--success);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .status-text {
+            text-align: right;
+            font-size: 0.9rem;
+            color: #7f8c8d;
+            margin-bottom: 10px;
+        }
+
+        /* Question Card */
+        .quiz-card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            transition: transform 0.3s;
+        }
+
+        .question-text {
+            font-size: 1.3rem;
+            margin-bottom: 25px;
+            font-weight: 500;
+        }
+
+        .highlight {
+            color: var(--primary);
+            font-weight: bold;
+            border-bottom: 2px solid #aaddff;
+        }
+
+        /* Answer Buttons */
+        .answers-grid {
+            display: grid;
+            gap: 15px;
+        }
+
+        .answer-btn {
+            background: #f8f9fa;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 15px 20px;
+            font-size: 1.1rem;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #555;
+            position: relative;
+        }
+
+        .answer-btn:hover:not(.disabled) {
+            background-color: #e3f2fd;
+            border-color: var(--primary);
+            padding-left: 25px; /* Kleiner Ruck nach rechts */
+        }
+
+        .answer-btn.correct {
+            background-color: #d4edda;
+            border-color: var(--success);
+            color: #155724;
+        }
+
+        .answer-btn.wrong {
+            background-color: #f8d7da;
+            border-color: var(--error);
+            color: #721c24;
+            opacity: 0.7;
+        }
+
+        .answer-btn.disabled {
+            pointer-events: none;
+            cursor: default;
+        }
+
+        /* Feedback Section */
+        .feedback-box {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            background-color: #f1f2f6;
+            display: none; /* Hidden initially */
+            animation: fadeIn 0.3s;
+        }
+
+        .feedback-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .correct-text { color: var(--success); }
+        .wrong-text { color: var(--error); }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Controls */
+        .controls {
+            margin-top: 25px;
+            text-align: center;
+        }
+
+        .btn-next {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 1.1rem;
+            border-radius: 25px;
+            cursor: pointer;
+            display: none; /* Hidden until answered */
+            box-shadow: 0 4px 10px rgba(52, 152, 219, 0.3);
+            transition: transform 0.2s;
+        }
+
+        .btn-next:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+        
+        .btn-restart {
+            background-color: #95a5a6;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        /* End Screen */
+        .end-screen {
+            text-align: center;
+            display: none;
+        }
+        
+        .score-circle {
+            width: 120px;
+            height: 120px;
+            background: var(--primary);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: bold;
+            margin: 0 auto 20px auto;
+        }
+
+        @media (min-width: 600px) {
+            .answers-grid {
+                grid-template-columns: 1fr 1fr; /* 2 Spalten auf Desktop */
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Kasus-Trainer: Partizipien</h1>
+    
+    <div class="intro">
+        <strong>Aufgabe:</strong> Wählen Sie die Form des Partizips, die im richtigen Fall (Kasus) steht.<br>
+        Achten Sie auf Präpositionen und Verben, die den Fall bestimmen.
+    </div>
+
+    <div id="quiz-interface">
+        <div class="status-text">Frage <span id="current-q">1</span> von 10</div>
+        <div class="progress-container">
+            <div class="progress-bar" id="progress-bar"></div>
+        </div>
+
+        <div class="quiz-card" id="question-card">
+            <div class="question-text" id="question-text">
+                Lade Frage...
+            </div>
+
+            <div class="answers-grid" id="answers-area">
+                <!-- Buttons werden hier generiert -->
+            </div>
+
+            <div class="feedback-box" id="feedback">
+                <span class="feedback-title" id="feedback-title"></span>
+                <span id="feedback-msg"></span>
+            </div>
+            
+            <div class="controls">
+                <button class="btn-next" id="btn-next" onclick="nextQuestion()">Nächste Frage &rarr;</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="end-screen" class="end-screen">
+        <div class="score-circle" id="final-score">0/10</div>
+        <h2>Gut gemacht!</h2>
+        <p>Sie haben das Quiz beendet.</p>
+        <button class="btn-restart" onclick="restartQuiz()">Noch einmal spielen</button>
+    </div>
+
+</div>
+
+<script>
+    /* 
+       Datenstruktur:
+       q: Der Satz mit Lücke (___)
+       highlight: Welches Wort soll hervorgehoben werden? (optional, für den visuellen Fokus)
+       options: Array von Antwortmöglichkeiten
+       correct: Index der richtigen Antwort (0, 1, 2...)
+       explanation: Kurze Erklärung warum (z.B. "Genitiv Plural")
+    */
+    const questions = [
+        {
+            q: "Мы говорили о человеке, ___ из Москвы.",
+            highlight: "о человеке",
+            options: ["приехавший", "приехавшем", "приехавшему"],
+            correct: 1,
+            explanation: "Präpositiv (6. Fall) wegen 'о' (über)."
+        },
+        {
+            q: "Я не вижу студента, ___ книгу.",
+            highlight: "студента",
+            options: ["читающего", "читающий", "читающем"],
+            correct: 0, // Achtung: Genitiv bei Verneinung oder Akkusativ belebt = Genitiv
+            // Hier Präteritum Partizip Kontext, Option 0 ist Präsens, ups. 
+            // Korrektur für Präteritum Aufgabe:
+            options: ["читавшего", "читавший", "читавшем"],
+            correct: 0,
+            explanation: "Genitiv/Akkusativ (belebt) sind gleich: 'читавшего'."
+        },
+        {
+            q: "Позвони врачу, ___ тебя.",
+            highlight: "врачу",
+            options: ["лечивший", "лечившему", "лечившим"],
+            correct: 1,
+            explanation: "Dativ (3. Fall), da 'врачу' Dativ ist."
+        },
+        {
+            q: "Мы встретили девушку, ___ в парке.",
+            highlight: "девушку",
+            options: ["гулявшую", "гулявшая", "гулявшей"],
+            correct: 0,
+            explanation: "Akkusativ (4. Fall) Femininum Singular: Endung -ую."
+        },
+        {
+            q: "Он подошел к людям, ___ на улице.",
+            highlight: "к людям",
+            options: ["стоявшим", "стоявшими", "стоявших"],
+            correct: 0,
+            explanation: "Dativ Plural (к кому?): Endung -им."
+        },
+        {
+            q: "Это подарок от друга, ___ в Берлине.",
+            highlight: "от друга",
+            options: ["живший", "жившего", "жившем"],
+            correct: 1,
+            explanation: "Genitiv (2. Fall) nach 'от'."
+        },
+        {
+            q: "Я доволен работой, ___ вчера.",
+            highlight: "работой",
+            options: ["сделанную", "сделанной", "сделавшей"],
+            correct: 2, 
+            // Halt, "Arbeit die gemacht hat" (aktiv)? 
+            // Wenn die Arbeit selbst etwas getan hat? Eher Passiv. 
+            // Aber Aufgabe ist AKTIV Partizip.
+            // Besserer Satz: "Ich bin zufrieden mit der Schülerin, die die Arbeit gemacht hat."
+            // Neuer Satz:
+            q: "Я доволен ученицей, ___ упражнение.",
+            highlight: "ученицей",
+            options: ["сделавшей", "сделавшая", "сделавшую"],
+            correct: 0,
+            explanation: "Instrumental (5. Fall) nach 'доволен'."
+        },
+        {
+            q: "На столе лежало письмо, ___ вчера.",
+            highlight: "письмо",
+            options: ["пришедшее", "пришедший", "пришедшая"],
+            correct: 0,
+            explanation: "Nominativ Neutrum ('письмо' ist sächlich)."
+        },
+        {
+            q: "Ты знаешь людей, ___ этот дом?",
+            highlight: "людей",
+            options: ["купившие", "купивших", "купившими"],
+            correct: 1,
+            explanation: "Akkusativ Plural belebt (= Genitiv): Endung -их."
+        },
+        {
+            q: "Она разговаривала с туристом, ___ билет.",
+            highlight: "с туристом",
+            options: ["потерявший", "потерявшим", "потерявшем"],
+            correct: 1,
+            explanation: "Instrumental (5. Fall) nach 'с'."
+        }
+    ];
+
+    let currentIdx = 0;
+    let score = 0;
+    
+    // DOM Elements
+    const questionText = document.getElementById('question-text');
+    const answersArea = document.getElementById('answers-area');
+    const feedbackBox = document.getElementById('feedback');
+    const feedbackTitle = document.getElementById('feedback-title');
+    const feedbackMsg = document.getElementById('feedback-msg');
+    const nextBtn = document.getElementById('btn-next');
+    const progressBar = document.getElementById('progress-bar');
+    const currentQSpan = document.getElementById('current-q');
+    
+    const quizInterface = document.getElementById('quiz-interface');
+    const endScreen = document.getElementById('end-screen');
+    const finalScore = document.getElementById('final-score');
+
+    function initQuiz() {
+        currentIdx = 0;
+        score = 0;
+        quizInterface.style.display = 'block';
+        endScreen.style.display = 'none';
+        loadQuestion();
+    }
+
+    function loadQuestion() {
+        const q = questions[currentIdx];
+        
+        // Update UI info
+        currentQSpan.textContent = currentIdx + 1;
+        const progressPercent = ((currentIdx) / questions.length) * 100;
+        progressBar.style.width = `${progressPercent}%`;
+
+        // Reset state
+        feedbackBox.style.display = 'none';
+        nextBtn.style.display = 'none';
+        answersArea.innerHTML = ''; // Clear old buttons
+
+        // Highlight Reference Word
+        let displayHTML = q.q.replace('___', '_____'); // Platzhalter
+        if (q.highlight) {
+            // Einfaches Replace, falls Highlight im Text vorkommt
+            // Für Robustheit könnte man RegEx nutzen, hier reicht String replace
+            displayHTML = displayHTML.replace(q.highlight, `<span class="highlight">${q.highlight}</span>`);
+        }
+        questionText.innerHTML = displayHTML;
+
+        // Generate Buttons
+        q.options.forEach((opt, index) => {
+            const btn = document.createElement('button');
+            btn.className = 'answer-btn';
+            btn.textContent = opt;
+            btn.onclick = () => checkAnswer(index, btn);
+            answersArea.appendChild(btn);
+        });
+    }
+
+    function checkAnswer(selectedIndex, btnElement) {
+        const q = questions[currentIdx];
+        const buttons = answersArea.querySelectorAll('.answer-btn');
+
+        // Disable all buttons
+        buttons.forEach(b => b.classList.add('disabled'));
+
+        if (selectedIndex === q.correct) {
+            // Richtig
+            btnElement.classList.add('correct');
+            feedbackTitle.textContent = "Richtig!";
+            feedbackTitle.className = "feedback-title correct-text";
+            score++;
+        } else {
+            // Falsch
+            btnElement.classList.add('wrong');
+            feedbackTitle.textContent = "Leider falsch.";
+            feedbackTitle.className = "feedback-title wrong-text";
+            
+            // Richtige Antwort hervorheben
+            buttons[q.correct].classList.add('correct');
+        }
+
+        feedbackMsg.textContent = q.explanation;
+        feedbackBox.style.display = 'block';
+        
+        // Button Text anpassen (letzte Frage?)
+        if (currentIdx === questions.length - 1) {
+            nextBtn.textContent = "Ergebnis ansehen";
+        } else {
+            nextBtn.textContent = "Nächste Frage \u2192";
+        }
+        nextBtn.style.display = 'inline-block';
+    }
+
+    function nextQuestion() {
+        if (currentIdx < questions.length - 1) {
+            currentIdx++;
+            loadQuestion();
+        } else {
+            showEndScreen();
+        }
+    }
+
+    function showEndScreen() {
+        quizInterface.style.display = 'none';
+        endScreen.style.display = 'block';
+        finalScore.textContent = `${score}/${questions.length}`;
+        
+        // Progress Bar voll machen
+        progressBar.style.width = '100%';
+    }
+
+    function restartQuiz() {
+        initQuiz();
+    }
+
+    // Start
+    initQuiz();
+
+</script>
+
+</body>
+</html>
