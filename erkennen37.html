@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Markierungsaufgabe: Partizipien</title>
+    <style>
+        :root {
+            --primary: #3498db;      /* Blau für Auswahl */
+            --primary-dark: #2980b9;
+            --success: #2ecc71;      /* Grün für Richtig */
+            --error: #e74c3c;        /* Rot für Falsch */
+            --missed: #f1c40f;       /* Gelb für Vergessen */
+            --text-color: #333;
+            --bg-hover: #e3f2fd;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
+            padding: 20px;
+            margin: 0;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+
+        h2 {
+            color: var(--primary-dark);
+            margin-top: 0;
+        }
+
+        .instruction {
+            background-color: #e8f4fd;
+            border-left: 5px solid var(--primary);
+            padding: 15px;
+            margin-bottom: 25px;
+            border-radius: 4px;
+        }
+
+        /* Text Area Styles */
+        .text-area {
+            font-size: 1.2rem; /* Größere Schrift für bessere Lesbarkeit auf Mobile */
+            line-height: 2.2;  /* Hoher Zeilenabstand damit Markierungen sich nicht überlappen */
+            text-align: justify;
+        }
+
+        /* Interactive Word Styles */
+        .word {
+            cursor: pointer;
+            padding: 4px 6px;
+            margin: 0 1px;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+            border: 2px solid transparent; /* Platzhalter für Border, damit es nicht springt */
+            user-select: none; /* Verhindert Textmarkierung beim schnellen Tippen */
+            -webkit-tap-highlight-color: transparent; /* Entfernt Standard-Highlight auf Mobile */
+            display: inline-block; /* Wichtig für Padding/Margin */
+        }
+
+        .word:hover {
+            background-color: var(--bg-hover);
+        }
+
+        /* State: Selected by User */
+        .word.selected {
+            background-color: var(--primary);
+            color: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        /* State: Checked & Correct */
+        .word.correct {
+            background-color: var(--success) !important;
+            color: white !important;
+            border-color: var(--success);
+        }
+
+        /* State: Checked & Wrong */
+        .word.wrong {
+            background-color: var(--error) !important;
+            color: white !important;
+            text-decoration: line-through;
+        }
+
+        /* State: Missed (Solution) */
+        .word.missed {
+            border-color: var(--missed);
+            background-color: #fff9c4; /* Helles Gelb */
+        }
+
+        /* Punctuation (not clickable) */
+        .punct {
+            display: inline-block;
+            margin-right: 5px;
+        }
+
+        /* Controls Area */
+        .controls {
+            margin-top: 30px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap; /* Umbruch auf kleinen Bildschirmen */
+        }
+
+        button {
+            flex: 1; /* Buttons teilen sich den Platz */
+            min-width: 140px;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1rem;
+            color: white;
+            transition: transform 0.1s, opacity 0.2s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        .btn-check { background-color: var(--primary); }
+        .btn-check:hover { background-color: var(--primary-dark); }
+
+        .btn-reset { background-color: #95a5a6; }
+        .btn-reset:hover { background-color: #7f8c8d; }
+
+        .btn-solve { background-color: #f39c12; }
+        .btn-solve:hover { background-color: #d35400; }
+
+        /* Feedback Area */
+        .feedback {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            font-weight: bold;
+            display: none; /* Hidden by default */
+            text-align: center;
+        }
+        .feedback.success { background-color: #d4edda; color: #155724; }
+        .feedback.fail { background-color: #f8d7da; color: #721c24; }
+
+        /* Mobile Optimization */
+        @media (max-width: 600px) {
+            .container { padding: 15px; }
+            .text-area { font-size: 1.1rem; text-align: left; } /* Justify ist auf Mobile oft hässlich */
+            .controls { flex-direction: column; }
+            button { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Erkennen und Identifizieren</h2>
+    
+    <div class="instruction">
+        <strong>Aufgabe:</strong> Tippen oder klicken Sie auf alle <strong>aktiven Partizipien der Vergangenheit</strong> im folgenden Text.<br>
+        <em style="font-size: 0.9em; color: #666;">Hinweis: Achten Sie darauf, sie nicht mit Adjektiven oder normalen Verben zu verwechseln.</em>
+    </div>
+
+    <!-- Der Textcontainer -->
+    <div class="text-area" id="exercise-text">
+        <!-- Text wird dynamisch per JS generiert, um HTML sauber zu halten -->
+    </div>
+
+    <div class="feedback" id="feedback-msg"></div>
+
+    <div class="controls">
+        <button class="btn-check" onclick="checkAnswers()">Überprüfen</button>
+        <button class="btn-reset" onclick="resetExercise()">Zurücksetzen</button>
+        <button class="btn-solve" onclick="showSolution()">Lösung anzeigen</button>
+    </div>
+</div>
+
+<script>
+    // Datenstruktur: Text mit Markierung, ob es ein Zielwort ist
+    // text: Das Wort selbst
+    // isParticiple: true = Lösung, false = Distraktor
+    // punct: Satzzeichen danach (optional)
+    const textData = [
+        { text: "Вчера", isParticiple: false },
+        { text: "мы", isParticiple: false },
+        { text: "видели", isParticiple: false }, // Verb Präteritum (Distraktor)
+        { text: "туриста,", isParticiple: false },
+        { text: "потерявшего", isParticiple: true }, // TREFFER
+        { text: "билет.", isParticiple: false },
+        
+        { text: "Грустный", isParticiple: false }, // Adjektiv (Distraktor)
+        { text: "человек,", isParticiple: false },
+        { text: "стоявший", isParticiple: true }, // TREFFER
+        { text: "на", isParticiple: false },
+        { text: "вокзале,", isParticiple: false },
+        { text: "громко", isParticiple: false },
+        { text: "говорил", isParticiple: false }, // Verb Präteritum
+        { text: "по", isParticiple: false },
+        { text: "телефону.", isParticiple: false },
+
+        { text: "Рядом", isParticiple: false },
+        { text: "спала", isParticiple: false },
+        { text: "собака,", isParticiple: false },
+        { text: "уставшая", isParticiple: true }, // TREFFER (sieht aus wie Adj, ist aber Partizip/Adj-Übergang, hier als Ptz gewertet von "устать")
+        { text: "после", isParticiple: false },
+        { text: "игры.", isParticiple: false },
+
+        { text: "Женщина,", isParticiple: false },
+        { text: "купившая", isParticiple: true }, // TREFFER
+        { text: "ему", isParticiple: false },
+        { text: "новый", isParticiple: false }, // Adjektiv
+        { text: "билет,", isParticiple: false },
+        { text: "была", isParticiple: false },
+        { text: "очень", isParticiple: false },
+        { text: "добрая.", isParticiple: false }
+    ];
+
+    const container = document.getElementById('exercise-text');
+    const feedback = document.getElementById('feedback-msg');
+
+    // 1. Initialisierung: Text rendern
+    function init() {
+        container.innerHTML = '';
+        textData.forEach((item, index) => {
+            // Span für das Wort erstellen
+            const span = document.createElement('span');
+            
+            // Text und Satzzeichen trennen für sauberes Klicken
+            // Wir nehmen an, das Wort im Array hat evtl. Satzzeichen am Ende
+            let wordText = item.text;
+            let punctuation = '';
+            
+            // Einfache Regex um Satzzeichen am Ende abzutrennen (.,!?)
+            const match = wordText.match(/([а-яА-ЯёЁa-zA-Z-]+)([^а-яА-ЯёЁa-zA-Z0-9]*)$/);
+            
+            if (match) {
+                wordText = match[1];      // Das eigentliche Wort
+                punctuation = match[2];   // Das Satzzeichen danach
+            }
+
+            span.textContent = wordText;
+            span.classList.add('word');
+            span.dataset.index = index; // Referenz auf Daten
+            
+            // Event Listener für Klick/Tap
+            span.onclick = function() {
+                // Nur toggeln, wenn wir nicht im "Lösungsmodus" sind (nach Check kann man nichts mehr ändern, bis Reset)
+                if(container.dataset.locked === "true") return;
+                
+                this.classList.toggle('selected');
+                feedback.style.display = 'none'; // Feedback ausblenden bei neuer Interaktion
+            };
+
+            container.appendChild(span);
+
+            // Satzzeichen separat hinzufügen (nicht klickbar)
+            if (punctuation) {
+                const punctSpan = document.createElement('span');
+                punctSpan.textContent = punctuation;
+                punctSpan.classList.add('punct');
+                container.appendChild(punctSpan);
+            } else {
+                // Leerzeichen hinzufügen
+                container.appendChild(document.createTextNode(' '));
+            }
+        });
+    }
+
+    // 2. Überprüfen Funktion
+    function checkAnswers() {
+        let errorCount = 0;
+        let correctCount = 0;
+        let totalTargets = textData.filter(t => t.isParticiple).length;
+        let foundTargets = 0;
+
+        const words = container.querySelectorAll('.word');
+        
+        words.forEach(word => {
+            const index = word.dataset.index;
+            const data = textData[index];
+            const isSelected = word.classList.contains('selected');
+
+            // Reset visual states first (keep selected base)
+            word.classList.remove('correct', 'wrong', 'missed');
+
+            if (isSelected) {
+                if (data.isParticiple) {
+                    // Richtig ausgewählt
+                    word.classList.add('correct');
+                    foundTargets++;
+                } else {
+                    // Falsch ausgewählt (war kein Partizip)
+                    word.classList.add('wrong');
+                    errorCount++;
+                }
+            } else {
+                if (data.isParticiple) {
+                    // Vergessen auszuwählen (wird hier noch nicht markiert, erst bei 'Lösung')
+                    // Optional: Man könnte hier 'missed' anzeigen, aber oft verwirrt das beim ersten Check.
+                    // Wir lassen es neutral.
+                }
+            }
+        });
+
+        // Feedback Text
+        feedback.style.display = 'block';
+        if (foundTargets === totalTargets && errorCount === 0) {
+            feedback.textContent = "Perfekt! Alle Partizipien gefunden.";
+            feedback.className = "feedback success";
+            container.dataset.locked = "true"; // Sperren
+        } else {
+            if (errorCount > 0) {
+                feedback.textContent = `Das war nicht ganz richtig. ${errorCount} falsche Wörter markiert.`;
+                feedback.className = "feedback fail";
+            } else if (foundTargets < totalTargets) {
+                feedback.textContent = `Gut, aber es fehlen noch ${totalTargets - foundTargets} Partizipien.`;
+                feedback.className = "feedback fail";
+            }
+        }
+    }
+
+    // 3. Zurücksetzen Funktion
+    function resetExercise() {
+        const words = container.querySelectorAll('.word');
+        words.forEach(word => {
+            word.classList.remove('selected', 'correct', 'wrong', 'missed');
+        });
+        feedback.style.display = 'none';
+        container.dataset.locked = "false"; // Entsperren
+    }
+
+    // 4. Lösung anzeigen
+    function showSolution() {
+        // Erst alles resetten
+        resetExercise();
+        container.dataset.locked = "true"; // Sperren
+
+        const words = container.querySelectorAll('.word');
+        words.forEach(word => {
+            const index = word.dataset.index;
+            const data = textData[index];
+
+            if (data.isParticiple) {
+                word.classList.add('selected'); // Visuell auswählen
+                word.classList.add('correct');  // Als richtig markieren
+            }
+        });
+        
+        feedback.textContent = "Hier ist die Lösung (alle Partizipien sind markiert).";
+        feedback.className = "feedback";
+        feedback.style.display = 'block';
+    }
+
+    // Starten beim Laden
+    init();
+
+</script>
+
+</body>
+</html>
