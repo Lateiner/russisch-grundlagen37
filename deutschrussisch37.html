@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Russisch: Übersetzung (Semantik)</title>
+    <style>
+        :root {
+            --primary: #3498db;
+            --primary-dark: #2980b9;
+            --success: #2ecc71;
+            --error: #e74c3c;
+            --bg: #f0f2f5;
+            --card-bg: #ffffff;
+            --text: #2c3e50;
+            --border-radius: 16px;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: var(--primary-dark);
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+        }
+
+        .intro {
+            background-color: #e8f4fd;
+            border-left: 5px solid var(--primary);
+            padding: 15px;
+            margin-bottom: 30px;
+            border-radius: 4px;
+            color: #1e3a8a;
+        }
+
+        /* --- Quiz Card Structure --- */
+        .quiz-card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 30px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 6px;
+            background: #e0e0e0;
+        }
+        .progress-bar {
+            height: 100%;
+            background: var(--success);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .question-count {
+            color: #bdc3c7;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 15px;
+            display: block;
+            margin-top: 10px;
+        }
+
+        /* The German Phrase */
+        .phrase-box {
+            margin-bottom: 30px;
+        }
+
+        .lang-label {
+            font-size: 0.8rem;
+            color: #7f8c8d;
+            text-transform: uppercase;
+            font-weight: bold;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .phrase-text {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .context-hint {
+            font-size: 1rem;
+            color: #7f8c8d;
+            font-style: italic;
+            margin-top: 5px;
+        }
+
+        /* Options */
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .opt-btn {
+            background: #ffffff;
+            border: 2px solid #dfe6e9;
+            border-radius: 12px;
+            padding: 15px 20px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #444;
+            font-weight: 500;
+            text-align: left;
+            position: relative;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.03);
+        }
+
+        .opt-btn:hover:not(:disabled) {
+            border-color: var(--primary);
+            background: #f0f8ff;
+            transform: translateY(-2px);
+        }
+
+        .opt-btn:disabled {
+            cursor: default;
+            opacity: 0.7;
+        }
+
+        /* States */
+        .opt-btn.correct {
+            background-color: #d4edda;
+            border-color: #2ecc71;
+            color: #155724;
+        }
+        
+        .opt-btn.wrong {
+            background-color: #f8d7da;
+            border-color: #e74c3c;
+            color: #721c24;
+        }
+
+        /* Feedback */
+        .feedback {
+            display: none;
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: left;
+            animation: slideUp 0.3s ease-out;
+        }
+        .feedback.success { background: #e8f5e9; color: #1b5e20; }
+        .feedback.error { background: #ffebee; color: #b71c1c; }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Controls */
+        .next-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 40px;
+            border-radius: 30px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            margin-top: 20px;
+            display: none;
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+            transition: transform 0.2s;
+        }
+        .next-btn:hover { transform: scale(1.05); }
+
+        /* End Screen */
+        .end-screen {
+            display: none;
+            text-align: center;
+        }
+        .score-display {
+            font-size: 3rem;
+            font-weight: bold;
+            color: var(--primary);
+            margin: 20px 0;
+        }
+
+        @media (min-width: 600px) {
+            .options-grid { grid-template-columns: 1fr 1fr; } /* 2 Spalten auf Desktop */
+            .opt-btn { text-align: center; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Übersetzung: Kurzphrasen</h1>
+    
+    <div class="intro">
+        <strong>Aufgabe:</strong> Wählen Sie die korrekte russische Übersetzung für die deutsche Phrase.<br>
+        Achten Sie besonders auf den <strong>Aspekt</strong> (fertig vs. dauernd) und die <strong>Zeitform</strong>.
+    </div>
+
+    <div id="quiz-ui">
+        <div class="quiz-card">
+            <div class="progress-container">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+            <span class="question-count" id="q-count">Frage 1 / 10</span>
+
+            <div class="phrase-box">
+                <span class="lang-label">Deutsch</span>
+                <div class="phrase-text" id="de-phrase">Lade...</div>
+                <div class="context-hint" id="de-context"></div>
+            </div>
+
+            <span class="lang-label" style="margin-bottom: 15px;">Wähle Russisch:</span>
+            <div class="options-grid" id="options-area">
+                <!-- Buttons -->
+            </div>
+
+            <div class="feedback" id="feedback-area"></div>
+
+            <button class="next-btn" id="next-btn" onclick="nextQuestion()">Weiter &rarr;</button>
+        </div>
+    </div>
+
+    <div class="end-screen" id="end-screen">
+        <div class="quiz-card">
+            <h2>Ergebnis</h2>
+            <div class="score-display" id="final-score">0 / 10</div>
+            <p id="final-msg">Nachricht</p>
+            <button class="next-btn" style="display:inline-block" onclick="location.reload()">Neustart</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    /*
+      Datenstruktur:
+      de: Deutsche Phrase
+      hint: Optionaler Kontext (z.B. "Resultat")
+      correct: Die richtige russische Phrase
+      distractors: Array mit falschen Antworten
+      explanation: Erklärung für Feedback
+    */
+    const questions = [
+        {
+            de: "Der angekommene Zug",
+            hint: "(Er ist schon da)",
+            correct: "Поезд, пришедший...",
+            distractors: ["Поезд, приходящий...", "Поезд, пришёл..."],
+            explanation: "'Пришедший' ist das aktive Partizip der Vergangenheit (vollendet). 'Приходящий' ist Gegenwart."
+        },
+        {
+            de: "Das spielende Kind",
+            hint: "(Es spielte damals)",
+            correct: "Ребёнок, игравший...",
+            distractors: ["Ребёнок, играющий...", "Ребёнок, сыгравший..."],
+            explanation: "Wir brauchen Vergangenheit unvollendet ('spielte'). 'Играющий' ist 'spielend' (jetzt). 'Сыгравший' wäre 'zu Ende gespielt habend'."
+        },
+        {
+            de: "Der Mann, der das Buch schrieb",
+            hint: "(Er war dabei, es zu schreiben)",
+            correct: "Человек, писавший книгу...",
+            distractors: ["Человек, написавший книгу...", "Человек, пишущий книгу..."],
+            explanation: "'Schrieb' ist ein Prozess in der Vergangenheit (Unvollendet) &rarr; писавший."
+        },
+        {
+            de: "Der Mann, der das Buch geschrieben hat",
+            hint: "(Es ist fertig)",
+            correct: "Человек, написавший книгу...",
+            distractors: ["Человек, писавший книгу...", "Человек, написал книгу..."],
+            explanation: "'Geschrieben hat' ist ein Resultat (Vollendet) &rarr; написавший."
+        },
+        {
+            de: "Die Frau, die am Fenster saß",
+            hint: "(Zustand in der Vergangenheit)",
+            correct: "Женщина, сидевшая у окна...",
+            distractors: ["Женщина, севшая у окна...", "Женщина, сидящая у окна..."],
+            explanation: "'Saß' ist ein Zustand/Prozess (Unvollendet) &rarr; сидевшая. 'Севшая' hieße 'die sich gesetzt hat'."
+        },
+        {
+            de: "Die Studenten, die die Prüfung bestanden haben",
+            hint: "(Resultat)",
+            correct: "Студенты, сдавшие экзамен...",
+            distractors: ["Студенты, сдававшие экзамен...", "Студенты, сдающие экзамен..."],
+            explanation: "'Bestanden haben' ist ein Erfolg/Resultat (Vollendet) &rarr; сдавшие."
+        },
+        {
+            de: "Der Tourist, der die Karte verlor",
+            hint: "(Einmaliges Ereignis)",
+            correct: "Турист, потерявший карту...",
+            distractors: ["Турист, терявший карту...", "Турист, потерянный карту..."],
+            explanation: "'Verlor' ist ein punktuelles Ereignis (Vollendet) &rarr; потерявший."
+        },
+        {
+            de: "Die Leute, die im Park spazieren gingen",
+            hint: "(Prozess)",
+            correct: "Люди, гулявшие в парке...",
+            distractors: ["Люди, погулявшие в парке...", "Люди, гуляющие в парке..."],
+            explanation: "'Spazieren gingen' ist ein Prozess (Unvollendet) &rarr; гулявшие."
+        },
+        {
+            de: "Das vom Baum gefallene Blatt",
+            hint: "(Es liegt unten)",
+            correct: "Лист, упавший с дерева...",
+            distractors: ["Лист, падавший с дерева...", "Лист, павший с дерева..."],
+            explanation: "'Gefallen' ist das Resultat (Vollendet) &rarr; упавший. 'Падавший' hieße 'das (gerade) fiel'."
+        },
+        {
+            de: "Der Bus, der zur Haltestelle fuhr",
+            hint: "(Er war unterwegs dorthin)",
+            correct: "Автобус, ехавший к остановке...",
+            distractors: ["Автобус, поехавший к остановке...", "Автобус, приехавший к остановке..."],
+            explanation: "'Fuhr' (war unterwegs) ist ein Prozess (Unvollendet) &rarr; ехавший."
+        }
+    ];
+
+    let currentIdx = 0;
+    let score = 0;
+
+    // Elements
+    const elUi = document.getElementById('quiz-ui');
+    const elEnd = document.getElementById('end-screen');
+    const elPhrase = document.getElementById('de-phrase');
+    const elHint = document.getElementById('de-context');
+    const elOptions = document.getElementById('options-area');
+    const elFeedback = document.getElementById('feedback-area');
+    const elNext = document.getElementById('next-btn');
+    const elCount = document.getElementById('q-count');
+    const elProgress = document.getElementById('progress-bar');
+    
+    const elScore = document.getElementById('final-score');
+    const elMsg = document.getElementById('final-msg');
+
+    function initGame() {
+        currentIdx = 0;
+        score = 0;
+        elUi.style.display = 'block';
+        elEnd.style.display = 'none';
+        loadQuestion(0);
+    }
+
+    function loadQuestion(idx) {
+        const data = questions[idx];
+        
+        // Progress
+        elCount.textContent = `FRAGE ${idx + 1} / ${questions.length}`;
+        elProgress.style.width = `${(idx / questions.length) * 100}%`;
+
+        // Text
+        elPhrase.textContent = data.de;
+        elHint.textContent = data.hint;
+
+        // Reset
+        elFeedback.style.display = 'none';
+        elNext.style.display = 'none';
+        elOptions.innerHTML = '';
+
+        // Options (Correct + Distractors shuffled)
+        const opts = [data.correct, ...data.distractors].sort(() => 0.5 - Math.random());
+
+        opts.forEach(opt => {
+            const btn = document.createElement('button');
+            btn.className = 'opt-btn';
+            btn.textContent = opt;
+            btn.onclick = () => checkAnswer(opt, data.correct, data.explanation, btn);
+            elOptions.appendChild(btn);
+        });
+    }
+
+    function checkAnswer(selected, correct, explanation, btn) {
+        const allBtns = document.querySelectorAll('.opt-btn');
+        allBtns.forEach(b => b.disabled = true);
+
+        if (selected === correct) {
+            score++;
+            btn.classList.add('correct');
+            elFeedback.innerHTML = `<strong>Richtig!</strong><br>${explanation}`;
+            elFeedback.className = 'feedback success';
+        } else {
+            btn.classList.add('wrong');
+            // Highlight correct one
+            allBtns.forEach(b => {
+                if (b.textContent === correct) b.classList.add('correct');
+            });
+            elFeedback.innerHTML = `<strong>Falsch.</strong> Richtig ist: <em>${correct}</em><br>${explanation}`;
+            elFeedback.className = 'feedback error';
+        }
+
+        elFeedback.style.display = 'block';
+
+        if (currentIdx < questions.length - 1) {
+            elNext.textContent = "Weiter \u2192";
+        } else {
+            elNext.textContent = "Ergebnis anzeigen";
+        }
+        elNext.style.display = 'inline-block';
+    }
+
+    function nextQuestion() {
+        if (currentIdx < questions.length - 1) {
+            currentIdx++;
+            loadQuestion(currentIdx);
+        } else {
+            showEndScreen();
+        }
+    }
+
+    function showEndScreen() {
+        elUi.style.display = 'none';
+        elEnd.style.display = 'block';
+        elScore.textContent = `${score} / ${questions.length}`;
+        elProgress.style.width = '100%';
+
+        if (score === questions.length) {
+            elMsg.textContent = "Perfekt! Du hast alles verstanden.";
+        } else if (score >= 7) {
+            elMsg.textContent = "Gut gemacht! Ein paar kleine Fehler, aber das Prinzip sitzt.";
+        } else {
+            elMsg.textContent = "Nicht aufgeben! Wiederhole die Übung, um die Unterschiede zu lernen.";
+        }
+    }
+
+    // Start
+    initGame();
+
+</script>
+
+</body>
+</html>
