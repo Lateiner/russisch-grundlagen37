@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Russisch: Stammbildung (Lückentext)</title>
+    <style>
+        :root {
+            --primary: #3498db;
+            --primary-dark: #2980b9;
+            --success: #2ecc71;
+            --error: #e74c3c;
+            --text-color: #333;
+            --bg-light: #f0f2f5;
+            --card-bg: #ffffff;
+            --border-radius: 12px;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-light);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: var(--primary-dark);
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 1.8rem;
+        }
+
+        .intro {
+            background-color: #e8f4fd;
+            border-left: 5px solid var(--primary);
+            padding: 15px;
+            margin-bottom: 30px;
+            border-radius: 4px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            background: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            font-weight: bold;
+            color: #555;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        /* Grid für die Karten */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        /* Einzelne Karte */
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            transition: transform 0.2s;
+            border-left: 5px solid transparent; /* Für Status-Farbe */
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+        }
+
+        .verb-chain {
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+            color: #444;
+        }
+
+        .arrow {
+            color: #999;
+            margin: 0 5px;
+        }
+
+        .participle-line {
+            font-weight: bold;
+            font-size: 1.25rem;
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+
+        /* Die Lücke */
+        .gap {
+            display: inline-block;
+            min-width: 50px;
+            border-bottom: 3px solid var(--primary);
+            color: var(--primary);
+            text-align: center;
+            padding: 0 5px;
+            cursor: default;
+            transition: all 0.3s;
+        }
+
+        .gap.filled {
+            border-bottom-color: transparent;
+        }
+        
+        .gap.correct {
+            color: var(--success);
+            border-bottom-color: var(--success);
+        }
+        
+        .gap.wrong {
+            color: var(--error);
+            border-bottom-color: var(--error);
+        }
+
+        /* Antwort-Buttons */
+        .options-area {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .opt-btn {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #eee;
+            background: #fafafa;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            color: #555;
+            transition: all 0.2s;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .opt-btn:hover:not(.disabled) {
+            background: #e3f2fd;
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .opt-btn.disabled {
+            opacity: 0.5;
+            cursor: default;
+            pointer-events: none;
+        }
+
+        /* Animationen */
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            50% { transform: translateX(5px); }
+            75% { transform: translateX(-5px); }
+            100% { transform: translateX(0); }
+        }
+
+        .shake {
+            animation: shake 0.4s ease-in-out;
+        }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-top: 40px;
+            justify-content: center;
+        }
+
+        .action-btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            color: white;
+            transition: background 0.3s;
+            min-width: 150px;
+        }
+
+        .btn-reset { background-color: #95a5a6; }
+        .btn-reset:hover { background-color: #7f8c8d; }
+
+        .btn-solve { background-color: #f39c12; }
+        .btn-solve:hover { background-color: #d35400; }
+
+        @media (max-width: 600px) {
+            .cards-grid { grid-template-columns: 1fr; }
+            .participle-line { font-size: 1.1rem; }
+            .controls { flex-direction: column; }
+            .action-btn { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Stammbildung: Der Lückentext</h1>
+    
+    <div class="intro">
+        <strong>Aufgabe:</strong> Vervollständigen Sie die Kette.<br>
+        Infinitiv &rarr; Präteritum &rarr; Partizip.<br>
+        Wählen Sie das richtige Suffix (<strong>-вш-</strong> oder <strong>-ш-</strong>), um die Lücke zu füllen.
+    </div>
+
+    <div class="status-bar">
+        <span>Fortschritt: <span id="progress-text">0 / 10</span></span>
+        <span id="completion-msg" style="color: var(--success); font-weight: bold; display:none;">Alle gelöst!</span>
+    </div>
+
+    <div id="cards-container" class="cards-grid">
+        <!-- Karten werden hier generiert -->
+    </div>
+
+    <div class="controls">
+        <button class="action-btn btn-reset" onclick="resetApp()">Zurücksetzen</button>
+        <button class="action-btn btn-solve" onclick="solveApp()">Lösung anzeigen</button>
+    </div>
+</div>
+
+<script>
+    // Daten für die 10 Beispiele
+    // suffix: Die korrekte Lösung ('вш' oder 'ш')
+    // prefix: Der Teil VOR der Lücke
+    // ending: Der Teil NACH der Lücke (z.B. 'ий' oder 'ийся')
+    const verbData = [
+        { inf: "делать", past: "делал", prefix: "дела", suffix: "вш", ending: "ий" },
+        { inf: "читать", past: "читал", prefix: "чита", suffix: "вш", ending: "ий" },
+        { inf: "нести", past: "нёс", prefix: "нёс", suffix: "ш", ending: "ий" },
+        { inf: "видеть", past: "видел", prefix: "виде", suffix: "вш", ending: "ий" },
+        { inf: "расти", past: "рос", prefix: "рос", suffix: "ш", ending: "ий" },
+        { inf: "писать", past: "писал", prefix: "писа", suffix: "вш", ending: "ий" },
+        { inf: "везти", past: "вёз", prefix: "вёз", suffix: "ш", ending: "ий" },
+        { inf: "брать", past: "брал", prefix: "бра", suffix: "вш", ending: "ий" },
+        { inf: "спасти", past: "спас", prefix: "спас", suffix: "ш", ending: "ий" },
+        { inf: "умываться", past: "умывался", prefix: "умыва", suffix: "вш", ending: "ийся" } // Reflexiv
+    ];
+
+    const container = document.getElementById('cards-container');
+    const progressText = document.getElementById('progress-text');
+    const completionMsg = document.getElementById('completion-msg');
+
+    let correctCount = 0;
+
+    function initApp() {
+        container.innerHTML = '';
+        correctCount = 0;
+        updateProgress();
+
+        verbData.forEach((item, index) => {
+            // Karte erstellen
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.id = `card-${index}`;
+
+            // Verb-Kette (Text oben)
+            const chainDiv = document.createElement('div');
+            chainDiv.className = 'verb-chain';
+            chainDiv.innerHTML = `
+                <div>Infinitiv: <strong>${item.inf}</strong></div>
+                <div>Präteritum: <strong>${item.past}</strong></div>
+            `;
+
+            // Partizip-Zeile mit Lücke
+            const partLine = document.createElement('div');
+            partLine.className = 'participle-line';
+            
+            // Text vor Lücke
+            const preSpan = document.createElement('span');
+            preSpan.textContent = "Partizip: " + item.prefix;
+            
+            // Die Lücke selbst
+            const gapSpan = document.createElement('span');
+            gapSpan.className = 'gap';
+            gapSpan.textContent = '___';
+            gapSpan.id = `gap-${index}`;
+
+            // Text nach Lücke
+            const postSpan = document.createElement('span');
+            postSpan.textContent = item.ending;
+
+            partLine.appendChild(preSpan);
+            partLine.appendChild(gapSpan);
+            partLine.appendChild(postSpan);
+
+            // Buttons für Auswahl
+            const optionsDiv = document.createElement('div');
+            optionsDiv.className = 'options-area';
+
+            // Wir bieten immer -вш- und -ш- an (die gängigsten Optionen für diese Übung)
+            // Reihenfolge zufällig oder fest? Fest ist übersichtlicher für schnelles Tippen.
+            const suffixes = ['вш', 'ш'];
+            
+            suffixes.forEach(suf => {
+                const btn = document.createElement('button');
+                btn.className = 'opt-btn';
+                btn.textContent = `-${suf}-`;
+                btn.onclick = () => checkAnswer(index, suf, item.suffix, btn);
+                optionsDiv.appendChild(btn);
+            });
+
+            card.appendChild(chainDiv);
+            card.appendChild(partLine);
+            card.appendChild(optionsDiv);
+            container.appendChild(card);
+        });
+    }
+
+    function checkAnswer(index, selected, correct, btnElement) {
+        const card = document.getElementById(`card-${index}`);
+        const gap = document.getElementById(`gap-${index}`);
+        const buttons = card.querySelectorAll('.opt-btn');
+
+        if (selected === correct) {
+            // Richtig
+            gap.textContent = selected;
+            gap.classList.remove('wrong');
+            gap.classList.add('correct', 'filled');
+            
+            // Karte markieren
+            card.style.borderLeftColor = 'var(--success)';
+            
+            // Buttons deaktivieren
+            buttons.forEach(b => b.classList.add('disabled'));
+
+            // Fortschritt
+            correctCount++;
+            updateProgress();
+        } else {
+            // Falsch
+            gap.textContent = selected;
+            gap.classList.add('wrong', 'filled');
+            
+            // Feedback Animation
+            card.classList.remove('shake');
+            void card.offsetWidth; // Trigger reflow
+            card.classList.add('shake');
+            
+            // Knopf rot färben kurzzeitig oder dauerhaft für diesen Versuch?
+            // Wir lassen den Knopf aktiv, damit man korrigieren kann, aber zeigen Fehler.
+            btnElement.style.borderColor = 'var(--error)';
+            btnElement.style.color = 'var(--error)';
+            setTimeout(() => {
+                // Reset button style nach kurzer Zeit (optional, oder lassen als "schon probiert")
+                // Hier lassen wir es rot, damit man sieht was man geklickt hat.
+            }, 500);
+        }
+    }
+
+    function updateProgress() {
+        progressText.textContent = `${correctCount} / ${verbData.length}`;
+        completionMsg.style.display = correctCount === verbData.length ? 'inline' : 'none';
+    }
+
+    function resetApp() {
+        initApp();
+    }
+
+    function solveApp() {
+        // App neu bauen, aber ausgefüllt
+        container.innerHTML = '';
+        correctCount = verbData.length;
+        updateProgress();
+
+        verbData.forEach((item, index) => {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.style.borderLeftColor = '#999'; // Neutral für Lösung
+
+            const chainDiv = document.createElement('div');
+            chainDiv.className = 'verb-chain';
+            chainDiv.innerHTML = `
+                <div>Infinitiv: <strong>${item.inf}</strong></div>
+                <div>Präteritum: <strong>${item.past}</strong></div>
+            `;
+
+            const partLine = document.createElement('div');
+            partLine.className = 'participle-line';
+            
+            partLine.innerHTML = `Partizip: ${item.prefix}<span class="gap filled correct" style="border-bottom-color:transparent">${item.suffix}</span>${item.ending}`;
+
+            // Buttons inaktiv
+            const optionsDiv = document.createElement('div');
+            optionsDiv.className = 'options-area';
+            ['вш', 'ш'].forEach(suf => {
+                const btn = document.createElement('button');
+                btn.className = 'opt-btn disabled';
+                btn.textContent = `-${suf}-`;
+                if(suf === item.suffix) {
+                    btn.style.background = '#d4edda';
+                    btn.style.borderColor = '#28a745';
+                    btn.style.color = '#155724';
+                }
+                optionsDiv.appendChild(btn);
+            });
+
+            card.appendChild(chainDiv);
+            card.appendChild(partLine);
+            card.appendChild(optionsDiv);
+            container.appendChild(card);
+        });
+    }
+
+    // Start
+    initApp();
+
+</script>
+
+</body>
+</html>
