@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Russisch: Sätze verbinden (Korrektur)</title>
+    <style>
+        :root {
+            --primary: #3498db;
+            --primary-dark: #2980b9;
+            --secondary: #9b59b6;
+            --success: #2ecc71;
+            --error: #e74c3c;
+            --bg: #f8f9fa;
+            --card-bg: #ffffff;
+            --text: #34495e;
+            --border-radius: 12px;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: var(--primary-dark);
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+        }
+
+        .intro {
+            background-color: #e3f2fd;
+            border-left: 5px solid var(--primary);
+            padding: 15px;
+            margin-bottom: 30px;
+            border-radius: 4px;
+            color: #0c5460;
+        }
+
+        /* --- UI Components --- */
+        
+        .status-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: #7f8c8d;
+        }
+
+        .progress-bar {
+            background: #e9ecef;
+            height: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: var(--success);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .game-area {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 30px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* Source Sentences Area */
+        .source-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding-bottom: 20px;
+            border-bottom: 2px dashed #dee2e6;
+        }
+
+        .sentence-box {
+            background: #f1f3f5;
+            padding: 12px 15px;
+            border-radius: 8px;
+            border-left: 4px solid var(--primary);
+            font-size: 1.1rem;
+            position: relative;
+        }
+
+        .sentence-box::before {
+            content: "Satz 1";
+            position: absolute;
+            top: -8px;
+            right: 10px;
+            font-size: 0.7rem;
+            background: var(--primary);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            text-transform: uppercase;
+        }
+
+        .sentence-box:nth-child(2) {
+            border-left-color: var(--secondary);
+        }
+        
+        .sentence-box:nth-child(2)::before {
+            content: "Satz 2";
+            background: var(--secondary);
+        }
+
+        .connector-icon {
+            text-align: center;
+            font-size: 1.5rem;
+            color: #bdc3c7;
+            margin: -5px 0;
+        }
+
+        /* Target Sentence Area */
+        .target-container {
+            margin-top: 10px;
+        }
+
+        .label {
+            font-size: 0.9rem;
+            color: #7f8c8d;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .target-sentence {
+            font-size: 1.4rem;
+            line-height: 1.8;
+            font-weight: 500;
+        }
+
+        .gap {
+            display: inline-block;
+            min-width: 120px;
+            border-bottom: 3px solid var(--primary);
+            color: var(--primary);
+            text-align: center;
+            cursor: pointer;
+            padding: 0 5px;
+            transition: all 0.3s;
+            background: #e8f4fd;
+            border-radius: 4px;
+        }
+
+        .gap.filled {
+            border-bottom-style: solid;
+        }
+
+        .gap.correct {
+            background: #d4edda;
+            color: #155724;
+            border-color: #28a745;
+        }
+
+        .gap.wrong {
+            background: #f8d7da;
+            color: #721c24;
+            border-color: #dc3545;
+            animation: shake 0.4s;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        /* Options Grid */
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .opt-btn {
+            background: white;
+            border: 2px solid #ced4da;
+            border-radius: 8px;
+            padding: 15px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #495057;
+            font-weight: 500;
+        }
+
+        .opt-btn:hover:not(:disabled) {
+            border-color: var(--primary);
+            color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .opt-btn:disabled {
+            opacity: 0.6;
+            cursor: default;
+        }
+
+        /* Feedback */
+        .feedback {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 8px;
+            font-weight: bold;
+            display: none;
+            text-align: center;
+        }
+        .feedback.success { background: #d4edda; color: #155724; }
+        .feedback.error { background: #f8d7da; color: #721c24; }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .next-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            display: none;
+            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.4);
+            transition: transform 0.2s;
+        }
+        .next-btn:hover { transform: scale(1.05); }
+
+        /* End Screen Styles */
+        .end-screen {
+            text-align: center;
+            display: none;
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+        }
+
+        .score-display {
+            font-size: 3rem;
+            font-weight: bold;
+            color: var(--primary);
+            margin: 20px 0;
+        }
+
+        .score-text {
+            font-size: 1.2rem;
+            color: #555;
+            margin-bottom: 30px;
+        }
+
+        .restart-btn {
+            background: #6c757d;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: background 0.2s;
+        }
+        .restart-btn:hover { background: #5a6268; }
+
+        @media (max-width: 600px) {
+            .options-grid { grid-template-columns: 1fr; }
+            .target-sentence { font-size: 1.2rem; }
+            .sentence-box { font-size: 1rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Sätze verbinden</h1>
+    
+    <div class="intro">
+        <strong>Aufgabe:</strong> Verbinden Sie die beiden Sätze zu einem Satz mit Partizipialkonstruktion.<br>
+        Satz 2 wird zum Partizip. Achten Sie auf das Bezugswort in Satz 1!
+    </div>
+
+    <div id="game-ui">
+        <div class="status-header">
+            <span>Fortschritt</span>
+            <span id="counter-text">1 / 10</span>
+        </div>
+        <div class="progress-bar">
+            <div class="progress-fill" id="progress-fill"></div>
+        </div>
+
+        <div class="game-area">
+            
+            <!-- Die beiden Ursprungssätze -->
+            <div class="source-container">
+                <div class="sentence-box" id="sent-1">Lade...</div>
+                <div class="connector-icon">+</div>
+                <div class="sentence-box" id="sent-2">Lade...</div>
+            </div>
+
+            <!-- Der Zielsatz mit Lücke -->
+            <div class="target-container">
+                <div class="label">Ergebnis:</div>
+                <div class="target-sentence" id="target-sentence">
+                    <!-- Wird dynamisch gefüllt -->
+                </div>
+            </div>
+
+            <!-- Feedback Box -->
+            <div class="feedback" id="feedback"></div>
+
+            <!-- Auswahloptionen -->
+            <div class="options-grid" id="options-area"></div>
+
+            <div class="controls">
+                <button class="next-btn" id="next-btn" onclick="nextLevel()">Nächster Satz &rarr;</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="end-screen" id="end-screen">
+        <h2 id="end-title">Ergebnis</h2>
+        <div class="score-display" id="final-score">0 / 10</div>
+        <p class="score-text" id="final-msg">Nachricht</p>
+        <button class="restart-btn" onclick="initGame()">Neustart</button>
+    </div>
+</div>
+
+<script>
+    const levels = [
+        {
+            s1: "Вот поэт.",
+            s2: "Он жил в этом доме.",
+            targetPre: "Вот поэт,",
+            targetPost: "в этом доме.",
+            correct: "живший",
+            distractors: ["живущий", "жившим", "жившего"],
+            explanation: "Nominativ Maskulinum (поэт)."
+        },
+        {
+            s1: "Я вижу мальчика.",
+            s2: "Он играл в парке.",
+            targetPre: "Я вижу мальчика,",
+            targetPost: "в парке.",
+            correct: "игравшего",
+            distractors: ["игравший", "играющий", "игравшем"],
+            explanation: "Akkusativ/Genitiv Maskulinum (мальчика)."
+        },
+        {
+            s1: "Дети уже спят.",
+            s2: "Они гуляли весь день.",
+            targetPre: "Дети,",
+            targetPost: "весь день, уже спят.",
+            correct: "гулявшие",
+            distractors: ["гулявший", "гулявших", "гуляющие"],
+            explanation: "Nominativ Plural (дети)."
+        },
+        {
+            s1: "Позвони бабушке.",
+            s2: "Она приехала вчера.",
+            targetPre: "Позвони бабушке,",
+            targetPost: "вчера.",
+            correct: "приехавшей",
+            distractors: ["приехавшая", "приехавшую", "приехавший"],
+            explanation: "Dativ Femininum (бабушке)."
+        },
+        {
+            s1: "Мы говорили о студентах.",
+            s2: "Они опоздали на урок.",
+            targetPre: "Мы говорили о студентах,",
+            targetPost: "на урок.",
+            correct: "опоздавших",
+            distractors: ["опоздавшие", "опоздавшими", "опоздавшем"],
+            explanation: "Präpositiv Plural (о студентах)."
+        },
+        {
+            s1: "Он купил книгу.",
+            s2: "Книга лежала на столе.",
+            targetPre: "Он купил книгу,",
+            targetPost: "на столе.",
+            correct: "лежавшую",
+            distractors: ["лежавшая", "лежавший", "лежавшей"],
+            explanation: "Akkusativ Femininum (книгу)."
+        },
+        {
+            s1: "Я не знаю человека.",
+            s2: "Этот человек звонил тебе.",
+            targetPre: "Я не знаю человека,",
+            targetPost: "тебе.",
+            correct: "звонившего",
+            distractors: ["звонивший", "звонившему", "звонившим"],
+            explanation: "Genitiv Maskulinum (nach Verneinung 'не знаю')."
+        },
+        {
+            s1: "Туристы пошли в музей.",
+            s2: "Туристы приехали из Берлина.",
+            targetPre: "Туристы,",
+            targetPost: "из Берлина, пошли в музей.",
+            correct: "приехавшие",
+            distractors: ["приехавших", "приехавшими", "приехавший"],
+            explanation: "Nominativ Plural (туристы)."
+        },
+        {
+            s1: "Она разговаривала с врачом.",
+            s2: "Врач лечил её сына.",
+            targetPre: "Она разговаривала с врачом,",
+            targetPost: "её сына.",
+            correct: "лечившим",
+            distractors: ["лечивший", "лечившего", "лечившем"],
+            explanation: "Instrumental Maskulinum (с врачом)."
+        },
+        {
+            s1: "Это письмо от друга.",
+            s2: "Друг уехал в Америку.",
+            targetPre: "Это письмо от друга,",
+            targetPost: "в Америку.",
+            correct: "уехавшего",
+            distractors: ["уехавший", "уехавшем", "уехавшему"],
+            explanation: "Genitiv Maskulinum (от друга)."
+        }
+    ];
+
+    let currentIdx = 0;
+    let score = 0; // WICHTIG: Punktestand Variable
+    
+    // UI Elements
+    const sent1 = document.getElementById('sent-1');
+    const sent2 = document.getElementById('sent-2');
+    const targetSentence = document.getElementById('target-sentence');
+    const optionsArea = document.getElementById('options-area');
+    const feedback = document.getElementById('feedback');
+    const nextBtn = document.getElementById('next-btn');
+    const gameUI = document.getElementById('game-ui');
+    const endScreen = document.getElementById('end-screen');
+    const progressFill = document.getElementById('progress-fill');
+    const counterText = document.getElementById('counter-text');
+    
+    // End Screen Elements
+    const finalScore = document.getElementById('final-score');
+    const finalMsg = document.getElementById('final-msg');
+    const endTitle = document.getElementById('end-title');
+
+    function initGame() {
+        currentIdx = 0;
+        score = 0; // Reset Score
+        gameUI.style.display = 'block';
+        endScreen.style.display = 'none';
+        loadLevel(0);
+    }
+
+    function loadLevel(idx) {
+        const data = levels[idx];
+        
+        // Update Progress UI
+        const pct = (idx / levels.length) * 100;
+        progressFill.style.width = pct + '%';
+        counterText.textContent = `${idx + 1} / ${levels.length}`;
+
+        // Set Texts
+        sent1.textContent = data.s1;
+        sent2.textContent = data.s2;
+
+        // Set Target with Gap
+        targetSentence.innerHTML = `
+            <span>${data.targetPre}</span>
+            <div class="gap" id="gap">???</div>
+            <span>${data.targetPost}</span>
+        `;
+
+        // Reset UI
+        feedback.style.display = 'none';
+        nextBtn.style.display = 'none';
+        optionsArea.innerHTML = '';
+
+        // Options Buttons
+        const allOpts = [data.correct, ...data.distractors].sort(() => 0.5 - Math.random());
+        
+        allOpts.forEach(opt => {
+            const btn = document.createElement('button');
+            btn.className = 'opt-btn';
+            btn.textContent = opt;
+            btn.onclick = () => checkAnswer(opt, data.correct, data.explanation, btn);
+            optionsArea.appendChild(btn);
+        });
+    }
+
+    function checkAnswer(selected, correct, explanation, btnElement) {
+        const gap = document.getElementById('gap');
+        
+        // Alle Buttons deaktivieren
+        const allBtns = document.querySelectorAll('.opt-btn');
+        allBtns.forEach(b => b.disabled = true);
+
+        if (selected === correct) {
+            // RICHTIG
+            score++; // Score erhöhen!
+            
+            gap.textContent = selected;
+            gap.className = 'gap filled correct';
+            
+            feedback.innerHTML = `<span style='font-size:1.2em'>✔</span> Richtig! <br><span style='font-weight:normal; font-size:0.9em'>${explanation}</span>`;
+            feedback.className = 'feedback success';
+            feedback.style.display = 'block';
+
+            btnElement.style.borderColor = '#2ecc71';
+            btnElement.style.backgroundColor = '#e8f8f5';
+
+        } else {
+            // FALSCH
+            // Score NICHT erhöhen
+            
+            gap.textContent = selected;
+            gap.className = 'gap filled wrong';
+
+            feedback.innerHTML = `<span style='font-size:1.2em'>✘</span> Leider falsch.<br><span style='font-weight:normal; font-size:0.9em'>Die richtige Form wäre: <b>${correct}</b> (${explanation})</span>`;
+            feedback.className = 'feedback error';
+            feedback.style.display = 'block';
+
+            btnElement.style.borderColor = '#e74c3c';
+            btnElement.style.backgroundColor = '#fdedec';
+        }
+
+        // Next Button Logic
+        if (currentIdx < levels.length - 1) {
+            nextBtn.textContent = "Nächste Aufgabe \u2192";
+        } else {
+            nextBtn.textContent = "Ergebnis anzeigen";
+            progressFill.style.width = '100%';
+        }
+        nextBtn.style.display = 'inline-block';
+    }
+
+    function nextLevel() {
+        if (currentIdx < levels.length - 1) {
+            currentIdx++;
+            loadLevel(currentIdx);
+        } else {
+            showEndScreen();
+        }
+    }
+
+    function showEndScreen() {
+        gameUI.style.display = 'none';
+        endScreen.style.display = 'block';
+        
+        // Ergebnis anzeigen
+        finalScore.textContent = `${score} / ${levels.length}`;
+        
+        // Dynamische Nachricht basierend auf Score
+        if (score === levels.length) {
+            endTitle.textContent = "Perfekt!";
+            finalMsg.textContent = "Ausgezeichnet! Sie haben alle Sätze fehlerfrei verbunden.";
+            finalScore.style.color = "#2ecc71"; // Grün
+        } else if (score >= levels.length * 0.7) {
+            endTitle.textContent = "Gut gemacht!";
+            finalMsg.textContent = "Ein starkes Ergebnis. Nur wenige Fehler.";
+            finalScore.style.color = "#3498db"; // Blau
+        } else {
+            endTitle.textContent = "Übung macht den Meister";
+            finalMsg.textContent = "Sie haben einige Fehler gemacht. Versuchen Sie es doch noch einmal!";
+            finalScore.style.color = "#e67e22"; // Orange
+        }
+    }
+
+    // Start
+    initGame();
+
+</script>
+
+</body>
+</html>
