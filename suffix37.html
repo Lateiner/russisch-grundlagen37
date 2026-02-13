@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Russisch: Suffix-Zuordnung</title>
+    <!-- Polyfill für Touch Drag & Drop auf Mobile -->
+    <script src="https://cdn.jsdelivr.net/npm/drag-drop-touch@1.3.1/DragDropTouch.js"></script>
+    <style>
+        :root {
+            --primary: #3498db;
+            --secondary: #9b59b6;
+            --success: #2ecc71;
+            --error: #e74c3c;
+            --bg: #f0f4f8;
+            --card-bg: #ffffff;
+            --text: #2c3e50;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+            line-height: 1.5;
+            user-select: none; /* Verhindert Textmarkierung beim Draggen */
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .intro {
+            background-color: #d1ecf1;
+            border-left: 5px solid #17a2b8;
+            padding: 15px;
+            margin-bottom: 30px;
+            border-radius: 4px;
+            color: #0c5460;
+        }
+
+        /* --- DRAG & DROP AREA --- */
+        
+        /* Die Zonen */
+        .zones-container {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .zone {
+            flex: 1;
+            background: #dfe6e9;
+            border: 3px dashed #b2bec3;
+            border-radius: 12px;
+            padding: 15px;
+            min-height: 250px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: all 0.3s;
+        }
+
+        .zone-header {
+            font-weight: bold;
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            background: #fff;
+            padding: 8px 20px;
+            border-radius: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        /* Farben für Zonen */
+        .zone-vsh { border-color: var(--primary); background: #e3f2fd; }
+        .zone-vsh .zone-header { color: var(--primary); }
+        
+        .zone-sh { border-color: var(--secondary); background: #f3e5f5; }
+        .zone-sh .zone-header { color: var(--secondary); }
+
+        .zone.drag-over {
+            background: #fff;
+            transform: scale(1.02);
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+        }
+
+        /* Der Pool mit den Wörtern */
+        .pool-container {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            min-height: 100px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .pool-label {
+            width: 100%;
+            text-align: center;
+            color: #7f8c8d;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+        }
+
+        /* Draggable Items */
+        .draggable {
+            background: white;
+            border: 2px solid var(--primary);
+            color: var(--text);
+            padding: 10px 20px;
+            border-radius: 30px;
+            cursor: grab;
+            font-size: 1.1rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: transform 0.2s, background 0.2s;
+            touch-action: none; /* Wichtig für Touch Performance */
+        }
+
+        .draggable:active {
+            cursor: grabbing;
+            transform: scale(1.05);
+        }
+
+        /* Status Classes for Items */
+        .draggable.correct {
+            background: var(--success);
+            border-color: var(--success);
+            color: white;
+            cursor: default;
+            pointer-events: none; /* Festgeklebt */
+        }
+
+        .draggable.wrong {
+            background: var(--error);
+            border-color: var(--error);
+            color: white;
+            animation: shake 0.4s;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            justify-content: center;
+            margin-top: 30px;
+            gap: 15px;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: opacity 0.2s;
+        }
+
+        .btn-reset { background-color: #95a5a6; }
+        .btn-solve { background-color: #f39c12; }
+        .btn:hover { opacity: 0.9; }
+
+        /* Responsive */
+        @media (max-width: 700px) {
+            .zones-container {
+                flex-direction: column; /* Zonen untereinander */
+            }
+            .zone {
+                min-height: 150px; /* Kleiner auf Mobile */
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Suffix-Zuordnung</h1>
+    
+    <div class="intro">
+        <strong>Aufgabe:</strong> Ziehen Sie die Verben in die richtige Box.<br>
+        Entscheiden Sie anhand des Verbstamms (Vokal oder Konsonant), ob das Partizip mit <strong>-вш-</strong> oder <strong>-ш-</strong> gebildet wird.
+    </div>
+
+    <!-- Drop Zones -->
+    <div class="zones-container">
+        <!-- Zone für -vsh- -->
+        <div class="zone zone-vsh" id="zone-vsh" ondragover="allowDrop(event)" ondrop="drop(event)" data-type="vsh">
+            <div class="zone-header">Suffix -вш- (Vokal)</div>
+            <!-- Hier landen die Karten -->
+        </div>
+
+        <!-- Zone für -sh- -->
+        <div class="zone zone-sh" id="zone-sh" ondragover="allowDrop(event)" ondrop="drop(event)" data-type="sh">
+            <div class="zone-header">Suffix -ш- (Konsonant)</div>
+            <!-- Hier landen die Karten -->
+        </div>
+    </div>
+
+    <!-- Wort-Pool -->
+    <div class="pool-container" id="pool" ondragover="allowDrop(event)" ondrop="returnToPool(event)">
+        <div class="pool-label">Wörter hier nehmen:</div>
+        <!-- Wörter werden hier generiert -->
+    </div>
+
+    <div class="controls">
+        <button class="btn btn-reset" onclick="initGame()">Zurücksetzen</button>
+        <button class="btn btn-solve" onclick="showSolution()">Lösung anzeigen</button>
+    </div>
+</div>
+
+<script>
+    // Daten: Wörter und ihr korrekter Typ ('vsh' oder 'sh')
+    const verbs = [
+        { text: "играть (играл)", type: "vsh" },    // Vokal 'a'
+        { text: "нести (нёс)", type: "sh" },        // Konsonant 's'
+        { text: "читать (читал)", type: "vsh" },    // Vokal 'a'
+        { text: "расти (рос)", type: "sh" },        // Konsonant 's'
+        { text: "видеть (видел)", type: "vsh" },    // Vokal 'e'
+        { text: "идти (шёл)", type: "sh" },         // Konsonant (Unregelmäßig 'd'/'sch')
+        { text: "спасти (спас)", type: "sh" },      // Konsonant 's'
+        { text: "купить (купил)", type: "vsh" },    // Vokal 'i'
+        { text: "везти (вёз)", type: "sh" },        // Konsonant 'z'
+        { text: "писать (писал)", type: "vsh" }     // Vokal 'a'
+    ];
+
+    const pool = document.getElementById('pool');
+    const zoneVsh = document.getElementById('zone-vsh');
+    const zoneSh = document.getElementById('zone-sh');
+
+    function initGame() {
+        // Leeren
+        pool.innerHTML = '<div class="pool-label">Wörter hier nehmen:</div>';
+        // Entferne nur Karten aus Zonen, behalte Header
+        document.querySelectorAll('.zone .draggable').forEach(el => el.remove());
+
+        // Mischen
+        const shuffled = [...verbs].sort(() => 0.5 - Math.random());
+
+        shuffled.forEach((verb, index) => {
+            const el = document.createElement('div');
+            el.className = 'draggable';
+            el.textContent = verb.text;
+            el.draggable = true;
+            el.id = `verb-${index}`;
+            el.dataset.type = verb.type; // Speichere Lösung im Element
+            
+            // Drag Events
+            el.addEventListener('dragstart', dragStart);
+            
+            pool.appendChild(el);
+        });
+    }
+
+    /* --- DRAG & DROP LOGIC --- */
+    
+    function dragStart(e) {
+        e.dataTransfer.setData("text", e.target.id);
+        e.dataTransfer.effectAllowed = "move";
+        // Visuelles Feedback beim Greifen (optional)
+        e.target.style.opacity = '0.5';
+    }
+
+    // Wenn Drag endet (auch wenn nicht gedroppt)
+    document.addEventListener('dragend', function(e) {
+        if(e.target.classList.contains('draggable')) {
+            e.target.style.opacity = '1';
+        }
+    });
+
+    function allowDrop(e) {
+        e.preventDefault(); // Nötig, um Drop zu erlauben
+        // Highlight Zone logic könnte hier rein (class add 'drag-over')
+    }
+
+    function drop(e) {
+        e.preventDefault();
+        const id = e.dataTransfer.getData("text");
+        const draggable = document.getElementById(id);
+        
+        // Finde die Zone (e.target könnte der Header oder Text sein, also closest suchen)
+        const zone = e.target.closest('.zone');
+        
+        if (!zone || !draggable) return;
+
+        const correctType = draggable.dataset.type;
+        const zoneType = zone.dataset.type;
+
+        // CHECK: Ist es die richtige Zone?
+        if (correctType === zoneType) {
+            // RICHTIG
+            draggable.classList.remove('wrong');
+            draggable.classList.add('correct');
+            // Checkmark hinzufügen
+            if(!draggable.textContent.includes('✔')) draggable.textContent += ' ✔';
+            
+            zone.appendChild(draggable); // In Zone verschieben
+            
+            // Konfetti oder Sound könnte hier hin
+        } else {
+            // FALSCH
+            draggable.classList.add('wrong');
+            
+            // Kurz warten, Klasse entfernen, damit Animation erneut triggern kann
+            setTimeout(() => {
+                draggable.classList.remove('wrong');
+            }, 500);
+            
+            // Element bleibt im Pool oder springt zurück (da wir appendChild NICHT aufrufen)
+        }
+    }
+
+    function returnToPool(e) {
+        // Falls man es aus Versehen in eine Zone gezogen hat und zurücklegen will?
+        // In dieser Logik: Falsche landen gar nicht erst in der Zone. 
+        // Richtige sind 'fixed' (pointer-events: none), können also nicht zurückgezogen werden.
+        // Daher ist diese Funktion optional.
+        e.preventDefault();
+    }
+
+    function showSolution() {
+        // Reset game logic first to clear IDs etc.
+        pool.innerHTML = '<div class="pool-label">Leer</div>';
+        document.querySelectorAll('.zone .draggable').forEach(el => el.remove());
+
+        verbs.forEach((verb, index) => {
+            const el = document.createElement('div');
+            el.className = 'draggable correct'; // Gleich als richtig markieren
+            el.textContent = verb.text;
+            // Wir brauchen kein Drag mehr
+            
+            if (verb.type === 'vsh') {
+                zoneVsh.appendChild(el);
+            } else {
+                zoneSh.appendChild(el);
+            }
+        });
+    }
+
+    // Start
+    initGame();
+
+</script>
+
+</body>
+</html>
