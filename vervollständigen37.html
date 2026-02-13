@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Russisch: Tabelle vervollständigen</title>
+    <style>
+        :root {
+            --primary: #3498db;
+            --success: #2ecc71;
+            --error: #e74c3c;
+            --bg: #f4f6f9;
+            --card-bg: #ffffff;
+            --text: #2c3e50;
+            --border: #e0e0e0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: #2980b9;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .intro {
+            background-color: #e8f4fd;
+            border-left: 5px solid var(--primary);
+            padding: 15px;
+            margin-bottom: 30px;
+            border-radius: 4px;
+        }
+
+        /* --- TABLE / GRID DESIGN --- */
+        
+        /* Header Row (Desktop only) */
+        .table-header {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr; /* 3 gleich große Spalten */
+            gap: 15px;
+            padding: 15px;
+            background: #2c3e50;
+            color: white;
+            font-weight: bold;
+            border-radius: 8px 8px 0 0;
+            margin-bottom: 0;
+        }
+
+        /* Rows Container */
+        .table-body {
+            background: white;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            border-radius: 0 0 8px 8px;
+            overflow: hidden;
+        }
+
+        /* Individual Row */
+        .table-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 15px;
+            padding: 20px 15px;
+            border-bottom: 1px solid var(--border);
+            align-items: center; /* Vertikal zentrieren */
+        }
+
+        .table-row:last-child {
+            border-bottom: none;
+        }
+
+        .table-row.completed {
+            background-color: #f9fff9;
+        }
+
+        /* Content Cells */
+        .cell {
+            font-size: 1.1rem;
+        }
+        
+        /* Fixed text inside cell */
+        .fixed-text {
+            font-weight: 500;
+            padding: 5px;
+        }
+
+        /* Options container (Buttons) */
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .opt-btn {
+            background: #f8f9fa;
+            border: 2px solid #ddd;
+            padding: 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            text-align: left;
+            font-size: 1rem;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .opt-btn:hover:not([disabled]) {
+            border-color: var(--primary);
+            background: #eef7ff;
+        }
+
+        .opt-btn.correct {
+            background: var(--success);
+            border-color: var(--success);
+            color: white;
+        }
+
+        .opt-btn.wrong {
+            background: var(--error);
+            border-color: var(--error);
+            color: white;
+            opacity: 0.6;
+        }
+
+        /* Mobile Label (Hidden on Desktop) */
+        .mobile-label {
+            display: none;
+            font-size: 0.85rem;
+            color: #7f8c8d;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        /* --- RESPONSIVE DESIGN --- */
+        @media (max-width: 700px) {
+            .table-header {
+                display: none; /* Header verstecken */
+            }
+
+            .table-body {
+                background: transparent;
+                box-shadow: none;
+            }
+
+            .table-row {
+                display: flex;
+                flex-direction: column;
+                background: white;
+                margin-bottom: 20px;
+                border-radius: 8px;
+                box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+                border: 1px solid var(--border);
+                gap: 15px;
+            }
+
+            .cell {
+                width: 100%;
+                border-bottom: 1px solid #f0f0f0;
+                padding-bottom: 10px;
+            }
+
+            .cell:last-child {
+                border-bottom: none;
+                padding-bottom: 0;
+            }
+
+            .mobile-label {
+                display: block; /* Label auf Mobile anzeigen */
+            }
+
+            .fixed-text {
+                font-size: 1.2rem;
+            }
+        }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            justify-content: center;
+        }
+
+        .action-btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            color: white;
+            flex: 1;
+            max-width: 200px;
+        }
+
+        .btn-reset { background-color: #95a5a6; }
+        .btn-solve { background-color: #f39c12; }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Formenbau: Tabelle vervollständigen</h1>
+    
+    <div class="intro">
+        <strong>Aufgabe:</strong> Vervollständigen Sie die Tabelle.<br>
+        Es fehlen abwechselnd der Infinitiv, das Präteritum oder das Partizip.<br>
+        Achten Sie besonders auf <strong>unregelmäßige Verben</strong>.
+    </div>
+
+    <!-- Desktop Header -->
+    <div class="table-header">
+        <div>Infinitiv</div>
+        <div>Präteritum (er)</div>
+        <div>Partizip (mask.)</div>
+    </div>
+
+    <!-- Rows will be injected here -->
+    <div id="table-container" class="table-body"></div>
+
+    <div class="controls">
+        <button class="action-btn btn-reset" onclick="initTable()">Zurücksetzen</button>
+        <button class="action-btn btn-solve" onclick="showSolution()">Lösung anzeigen</button>
+    </div>
+</div>
+
+<script>
+    // Datenstruktur
+    // missingCol: 0=Infinitiv fehlt, 1=Präteritum fehlt, 2=Partizip fehlt
+    // options: Array mit 3 Möglichkeiten (1 richtig, 2 falsch)
+    // correctIndex: Welches der Options ist richtig?
+    const tableData = [
+        {
+            vals: ["идти", "шёл", "шедший"],
+            missingCol: 2, // Partizip fehlt
+            options: ["идущий", "шедший", "шёлший"],
+            correctIndex: 1
+        },
+        {
+            vals: ["нести", "нёс", "нёсший"],
+            missingCol: 1, // Präteritum fehlt
+            options: ["носил", "нес", "нёс"],
+            correctIndex: 2
+        },
+        {
+            vals: ["читать", "читал", "читавший"],
+            missingCol: 2, // Partizip fehlt (Einfach zum Einstieg)
+            options: ["читавший", "читающий", "читалший"],
+            correctIndex: 0
+        },
+        {
+            vals: ["умереть", "умер", "умерший"],
+            missingCol: 0, // Infinitiv fehlt
+            options: ["умирать", "смерть", "умереть"],
+            correctIndex: 2
+        },
+        {
+            vals: ["прийти", "пришёл", "пришедший"],
+            missingCol: 2, // Partizip fehlt
+            options: ["приходивший", "пришедший", "пришёлший"],
+            correctIndex: 1
+        },
+        {
+            vals: ["расти", "рос", "росший"],
+            missingCol: 1, // Präteritum fehlt
+            options: ["рос", "растил", "растал"],
+            correctIndex: 0
+        },
+        {
+            vals: ["вести", "вёл", "ведший"],
+            missingCol: 2, // Partizip fehlt (Schwer! d -> l Wechsel)
+            options: ["вёлший", "ведший", "ведущий"],
+            correctIndex: 1
+        },
+        {
+            vals: ["начать", "начал", "начавший"],
+            missingCol: 0, // Infinitiv fehlt
+            options: ["начинать", "начать", "начни"],
+            correctIndex: 1
+        },
+        {
+            vals: ["купить", "купил", "купивший"],
+            missingCol: 2, // Partizip fehlt (Vollendet)
+            options: ["покупавший", "купивший", "куплявший"],
+            correctIndex: 1
+        },
+        {
+            vals: ["везти", "вёз", "вёзший"],
+            missingCol: 1, // Präteritum fehlt
+            options: ["вёз", "возил", "вез"],
+            correctIndex: 0
+        }
+    ];
+
+    const container = document.getElementById('table-container');
+
+    function initTable() {
+        container.innerHTML = '';
+
+        tableData.forEach((row, rowIndex) => {
+            const rowDiv = document.createElement('div');
+            rowDiv.className = 'table-row';
+            rowDiv.id = `row-${rowIndex}`;
+
+            // 3 Spalten erzeugen
+            for (let col = 0; col < 3; col++) {
+                const cellDiv = document.createElement('div');
+                cellDiv.className = 'cell';
+
+                // Mobile Label hinzufügen
+                const label = document.createElement('div');
+                label.className = 'mobile-label';
+                if(col === 0) label.textContent = "Infinitiv";
+                if(col === 1) label.textContent = "Präteritum";
+                if(col === 2) label.textContent = "Partizip";
+                cellDiv.appendChild(label);
+
+                if (col === row.missingCol) {
+                    // Hier muss die Aufgabe hin (Buttons)
+                    const optContainer = document.createElement('div');
+                    optContainer.className = 'options-container';
+
+                    row.options.forEach((optText, optIndex) => {
+                        const btn = document.createElement('button');
+                        btn.className = 'opt-btn';
+                        btn.textContent = optText;
+                        btn.onclick = () => checkAnswer(btn, rowIndex, optIndex);
+                        optContainer.appendChild(btn);
+                    });
+                    cellDiv.appendChild(optContainer);
+
+                } else {
+                    // Fester Text
+                    const span = document.createElement('div');
+                    span.className = 'fixed-text';
+                    span.textContent = row.vals[col];
+                    cellDiv.appendChild(span);
+                }
+
+                rowDiv.appendChild(cellDiv);
+            }
+
+            container.appendChild(rowDiv);
+        });
+    }
+
+    function checkAnswer(btn, rowIndex, optIndex) {
+        const data = tableData[rowIndex];
+        const rowDiv = document.getElementById(`row-${rowIndex}`);
+        
+        // Buttons in dieser Zelle finden
+        // Wir müssen vom Button hoch zum Container
+        const containerDiv = btn.parentElement;
+        const buttons = containerDiv.querySelectorAll('.opt-btn');
+
+        if (optIndex === data.correctIndex) {
+            // Richtig
+            btn.classList.add('correct');
+            btn.innerHTML += ' &#10004;'; // Checkmark
+            
+            // Zeile als fertig markieren (visuell grünlich)
+            rowDiv.classList.add('completed');
+
+            // Alle Buttons deaktivieren
+            buttons.forEach(b => b.disabled = true);
+        } else {
+            // Falsch
+            btn.classList.add('wrong');
+            // Nur diesen Button deaktivieren, damit man weiter raten kann
+            btn.disabled = true;
+        }
+    }
+
+    function showSolution() {
+        // Tabelle neu aufbauen, aber nur mit Text
+        container.innerHTML = '';
+        tableData.forEach((row, rowIndex) => {
+            const rowDiv = document.createElement('div');
+            rowDiv.className = 'table-row completed'; // Grünlich
+
+            for (let col = 0; col < 3; col++) {
+                const cellDiv = document.createElement('div');
+                cellDiv.className = 'cell';
+
+                const label = document.createElement('div');
+                label.className = 'mobile-label';
+                if(col === 0) label.textContent = "Infinitiv";
+                if(col === 1) label.textContent = "Präteritum";
+                if(col === 2) label.textContent = "Partizip";
+                cellDiv.appendChild(label);
+
+                const textDiv = document.createElement('div');
+                textDiv.className = 'fixed-text';
+                textDiv.textContent = row.vals[col];
+                
+                // Wenn es die fehlende Spalte war, fett markieren oder Farbe
+                if (col === row.missingCol) {
+                    textDiv.style.color = 'var(--success)';
+                    textDiv.style.fontWeight = 'bold';
+                    textDiv.innerHTML += ' &#10004;';
+                }
+
+                cellDiv.appendChild(textDiv);
+                rowDiv.appendChild(cellDiv);
+            }
+            container.appendChild(rowDiv);
+        });
+    }
+
+    // Start
+    initTable();
+
+</script>
+
+</body>
+</html>
