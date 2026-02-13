@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Russisch: Satzbaukasten</title>
+    <style>
+        :root {
+            --primary: #3498db;
+            --primary-dark: #2980b9;
+            --success: #2ecc71;
+            --error: #e74c3c;
+            --bg: #fdfdfd;
+            --text: #2c3e50;
+            --tile-bg: #ffffff;
+            --tile-border: #bdc3c7;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: var(--primary-dark);
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .intro {
+            background-color: #e8f4fd;
+            border-left: 5px solid var(--primary);
+            padding: 15px;
+            margin-bottom: 30px;
+            border-radius: 4px;
+        }
+
+        /* Progress Bar */
+        .status-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: #7f8c8d;
+        }
+
+        .progress-track {
+            background-color: #e0e0e0;
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 25px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background-color: var(--success);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        /* --- Game Area --- */
+        .game-board {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            min-height: 300px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .instruction-hint {
+            text-align: center;
+            color: #95a5a6;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+            font-style: italic;
+        }
+
+        /* Target Area (The Sentence Line) */
+        .sentence-line {
+            min-height: 60px;
+            background-color: #f8f9fa;
+            border: 2px dashed #dcdcdc;
+            border-radius: 8px;
+            padding: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 30px;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+
+        .sentence-line.correct {
+            border-color: var(--success);
+            background-color: #e8f8f5;
+        }
+
+        .sentence-line.wrong {
+            border-color: var(--error);
+            background-color: #fdedec;
+        }
+
+        /* Source Area (The Pool) */
+        .word-pool {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            padding: 10px;
+        }
+
+        /* The Word Tiles */
+        .word-tile {
+            background-color: var(--tile-bg);
+            border: 2px solid var(--primary);
+            color: var(--text);
+            padding: 10px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            user-select: none;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .word-tile:hover {
+            transform: translateY(-2px);
+            background-color: #eef7ff;
+        }
+
+        .word-tile:active {
+            transform: scale(0.95);
+        }
+
+        /* Animation for moving tiles */
+        @keyframes popIn {
+            0% { transform: scale(0.5); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .pop-in {
+            animation: popIn 0.3s ease-out forwards;
+        }
+
+        /* Feedback Section */
+        .feedback-box {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+            display: none;
+        }
+        .feedback-success { background: #d4edda; color: #155724; }
+        .feedback-error { background: #f8d7da; color: #721c24; }
+
+        /* Controls */
+        .controls {
+            margin-top: auto;
+            padding-top: 20px;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            color: white;
+            transition: opacity 0.2s;
+            min-width: 120px;
+        }
+        .btn:hover { opacity: 0.9; }
+
+        .btn-check { background-color: var(--primary); }
+        .btn-next { background-color: var(--success); display: none; }
+        .btn-reset { background-color: #95a5a6; }
+
+        /* Translation hint */
+        .translation {
+            text-align: center;
+            color: #555;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        @media (max-width: 600px) {
+            .word-tile { font-size: 1rem; padding: 8px 12px; }
+            .sentence-line { min-height: 80px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Satzbaukasten</h1>
+    
+    <div class="intro">
+        <strong>Aufgabe:</strong> Bringen Sie die Wörter in die richtige Reihenfolge.<br>
+        Tippen Sie auf ein Wort, um es in die Zeile zu legen. Tippen Sie es erneut an, um es zurückzulegen.<br>
+        <em>Achten Sie auf Kommas und Großschreibung!</em>
+    </div>
+
+    <div class="status-header">
+        <span>Satz <span id="current-idx">1</span> von 10</span>
+    </div>
+    <div class="progress-track">
+        <div class="progress-fill" id="progress-bar"></div>
+    </div>
+
+    <div class="game-board">
+        <!-- Deutsche Übersetzung als Hilfe -->
+        <div class="translation" id="translation-text">Lade Satz...</div>
+
+        <div class="instruction-hint">Antwortzeile (Hierhin tippen):</div>
+        
+        <!-- Hier landen die Wörter -->
+        <div class="sentence-line" id="target-area"></div>
+
+        <div class="instruction-hint" style="margin-top: 20px;">Wortpool (Auswahl):</div>
+        
+        <!-- Hier starten die Wörter -->
+        <div class="word-pool" id="source-area"></div>
+
+        <div class="feedback-box" id="feedback"></div>
+
+        <div class="controls">
+            <button class="btn btn-reset" onclick="resetCurrentSentence()">Reset</button>
+            <button class="btn btn-check" id="btn-check" onclick="checkAnswer()">Prüfen</button>
+            <button class="btn btn-next" id="btn-next" onclick="nextSentence()">Weiter &rarr;</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    /* 
+       Datenstruktur:
+       de: Deutsche Übersetzung (Kontext)
+       correctOrder: Array der Wörter in korrekter Reihenfolge.
+       
+       Wir zerlegen die Sätze so, dass die Kommas direkt am Wort hängen.
+       Das macht die Zuordnung eindeutiger.
+    */
+    const sentences = [
+        {
+            de: "Die Zeitschrift lesende Frau lächelte. (Partizip nachgestellt)",
+            correctOrder: ["Женщина,", "читавшая", "журнал,", "улыбнулась."]
+        },
+        {
+            de: "Die zum Unterricht verspäteten Studenten entschuldigten sich. (Partizip vorangestellt)",
+            correctOrder: ["Опоздавшие", "на", "урок", "студенты", "извинились."]
+        },
+        {
+            de: "Der Tourist, der das Ticket verloren hatte, war traurig.",
+            correctOrder: ["Турист,", "потерявший", "билет,", "был", "грустным."]
+        },
+        {
+            de: "Die am Fenster sitzende Frau stand auf.",
+            correctOrder: ["Сидевшая", "у", "окна", "женщина", "встала."]
+        },
+        {
+            de: "Wir sahen den Zug, der vom Bahnhof abgefahren war.",
+            correctOrder: ["Мы", "видели", "поезд,", "отошедший", "от", "станции."]
+        },
+        {
+            de: "Die aus Moskau angekommenen Gäste schlafen schon.",
+            correctOrder: ["Приехавшие", "из", "Москвы", "гости", "уже", "спят."]
+        },
+        {
+            de: "Der Mann, der dieses Auto gekauft hat, ist glücklich.",
+            correctOrder: ["Человек,", "купивший", "эту", "машину,", "счастлив."]
+        },
+        {
+            de: "Die Mannschaft, die das Turnier gewonnen hat, erhielt einen Preis.",
+            correctOrder: ["Выигравшая", "турнир", "команда", "получила", "приз."]
+        },
+        {
+            de: "Ich kenne den Arzt, der deinen Bruder behandelt hat.",
+            correctOrder: ["Я", "знаю", "врача,", "лечившего", "твоего", "брата."]
+        },
+        {
+            de: "Der vom Baum gefallene Apfel war rot.",
+            correctOrder: ["Упавшее", "с", "дерева", "яблоко", "было", "красным."]
+        }
+    ];
+
+    let currentLevel = 0;
+    
+    // Arrays to hold current state
+    let poolWords = [];   // Wörter aktuell im Pool
+    let placedWords = []; // Wörter aktuell in der Zeile (in User-Reihenfolge)
+
+    // DOM Elements
+    const targetArea = document.getElementById('target-area');
+    const sourceArea = document.getElementById('source-area');
+    const transText = document.getElementById('translation-text');
+    const feedback = document.getElementById('feedback');
+    const btnCheck = document.getElementById('btn-check');
+    const btnNext = document.getElementById('btn-next');
+    const currentIdxEl = document.getElementById('current-idx');
+    const progressBar = document.getElementById('progress-bar');
+
+    function initGame() {
+        currentLevel = 0;
+        loadLevel(0);
+    }
+
+    function loadLevel(index) {
+        currentLevel = index;
+        const data = sentences[index];
+        
+        // UI Updates
+        currentIdxEl.textContent = index + 1;
+        progressBar.style.width = `${(index / sentences.length) * 100}%`;
+        transText.textContent = data.de;
+        feedback.style.display = 'none';
+        targetArea.className = 'sentence-line'; // reset colors
+        btnCheck.style.display = 'inline-block';
+        btnNext.style.display = 'none';
+
+        // State Reset
+        placedWords = [];
+        // Kopie der Wörter erstellen und mischen
+        poolWords = [...data.correctOrder].sort(() => 0.5 - Math.random());
+
+        render();
+    }
+
+    function render() {
+        // 1. Render Target Area (Placed Words)
+        targetArea.innerHTML = '';
+        if (placedWords.length === 0) {
+            targetArea.innerHTML = '<span style="color:#bdc3c7; width:100%; text-align:center;">Tippen Sie auf Wörter...</span>';
+        }
+        
+        placedWords.forEach((word, idx) => {
+            const tile = createTile(word, idx, 'placed');
+            targetArea.appendChild(tile);
+        });
+
+        // 2. Render Source Area (Pool Words)
+        sourceArea.innerHTML = '';
+        poolWords.forEach((word, idx) => {
+            const tile = createTile(word, idx, 'pool');
+            sourceArea.appendChild(tile);
+        });
+    }
+
+    function createTile(word, index, location) {
+        const div = document.createElement('div');
+        div.className = 'word-tile pop-in';
+        div.textContent = word;
+        
+        div.onclick = () => {
+            // Verhindern von Klicks, wenn Level gelöst ist
+            if (btnNext.style.display === 'inline-block') return;
+
+            feedback.style.display = 'none'; // Feedback ausblenden bei Änderung
+            targetArea.className = 'sentence-line';
+
+            if (location === 'pool') {
+                // Von Pool nach Target
+                const wordToMove = poolWords[index];
+                poolWords.splice(index, 1);
+                placedWords.push(wordToMove);
+            } else {
+                // Von Target zurück in Pool
+                const wordToMove = placedWords[index];
+                placedWords.splice(index, 1);
+                poolWords.push(wordToMove);
+            }
+            render();
+        };
+        return div;
+    }
+
+    function resetCurrentSentence() {
+        if (btnNext.style.display === 'inline-block') return; // Nicht resetten wenn fertig
+        loadLevel(currentLevel);
+    }
+
+    function checkAnswer() {
+        const correctArr = sentences[currentLevel].correctOrder;
+        
+        // 1. Check Length
+        if (placedWords.length !== correctArr.length) {
+            showFeedback(false, "Benutzen Sie alle Wörter!");
+            return;
+        }
+
+        // 2. Check Order
+        let isCorrect = true;
+        for (let i = 0; i < correctArr.length; i++) {
+            if (placedWords[i] !== correctArr[i]) {
+                isCorrect = false;
+                break;
+            }
+        }
+
+        if (isCorrect) {
+            showFeedback(true, "Richtig! Sehr gut.");
+            targetArea.classList.add('correct');
+            btnCheck.style.display = 'none';
+            
+            if (currentLevel < sentences.length - 1) {
+                btnNext.style.display = 'inline-block';
+            } else {
+                // Ende des Spiels
+                btnNext.textContent = "Fertig";
+                btnNext.style.display = 'inline-block';
+                btnNext.onclick = () => {
+                     alert("Glückwunsch! Alle Sätze richtig gebaut.");
+                     location.reload();
+                };
+                progressBar.style.width = '100%';
+            }
+        } else {
+            showFeedback(false, "Die Reihenfolge stimmt noch nicht.");
+            targetArea.classList.add('wrong');
+        }
+    }
+
+    function showFeedback(success, msg) {
+        feedback.style.display = 'block';
+        feedback.textContent = msg;
+        if (success) {
+            feedback.className = 'feedback-box feedback-success';
+        } else {
+            feedback.className = 'feedback-box feedback-error';
+        }
+    }
+
+    function nextSentence() {
+        loadLevel(currentLevel + 1);
+    }
+
+    // Start
+    initGame();
+
+</script>
+
+</body>
+</html>
