@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Russisch: Endungen ergänzen</title>
+    <style>
+        :root {
+            --primary: #3498db;
+            --primary-dark: #2980b9;
+            --success: #2ecc71;
+            --error: #e74c3c;
+            --bg: #f4f7f6;
+            --card-bg: #ffffff;
+            --text: #2c3e50;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: var(--primary-dark);
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .intro {
+            background-color: #e8f4fd;
+            border-left: 5px solid var(--primary);
+            padding: 15px;
+            margin-bottom: 30px;
+            border-radius: 4px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        /* Status Bar */
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            background: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            font-weight: bold;
+            color: #555;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        /* Quiz Card */
+        .quiz-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            text-align: center;
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .sentence-box {
+            font-size: 1.4rem;
+            margin-bottom: 30px;
+        }
+
+        .reference-word {
+            color: var(--primary-dark);
+            font-weight: bold;
+            text-decoration: underline;
+            text-decoration-thickness: 2px;
+            text-decoration-color: #aaddff;
+        }
+
+        /* The Gap */
+        .gap {
+            display: inline-block;
+            min-width: 60px;
+            border-bottom: 3px solid var(--primary);
+            color: var(--primary);
+            padding: 0 5px;
+            font-weight: bold;
+            transition: color 0.3s, border-color 0.3s;
+        }
+
+        .gap.correct {
+            border-bottom-color: var(--success);
+            color: var(--success);
+        }
+
+        .gap.wrong {
+            border-bottom-color: var(--error);
+            color: var(--error);
+        }
+
+        /* Options Grid */
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr); /* 2 Spalten Standard */
+            gap: 15px;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .opt-btn {
+            background: #f8f9fa;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 15px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #555;
+            font-weight: 500;
+        }
+
+        .opt-btn:hover:not(.disabled) {
+            background: #e3f2fd;
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .opt-btn.correct {
+            background: var(--success);
+            border-color: var(--success);
+            color: white;
+        }
+
+        .opt-btn.wrong {
+            background: var(--error);
+            border-color: var(--error);
+            color: white;
+        }
+
+        .opt-btn.disabled {
+            pointer-events: none;
+            opacity: 0.6;
+        }
+
+        /* Animation */
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-8px); }
+            50% { transform: translateX(8px); }
+            75% { transform: translateX(-8px); }
+            100% { transform: translateX(0); }
+        }
+
+        .shake {
+            animation: shake 0.4s ease-in-out;
+        }
+
+        /* Controls */
+        .controls {
+            margin-top: 30px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            font-size: 1rem;
+            min-width: 140px;
+        }
+
+        .btn-next { background-color: var(--primary); display: none; } /* Hidden initially */
+        .btn-reset { background-color: #95a5a6; }
+        .btn:hover { opacity: 0.9; }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .sentence-box { font-size: 1.2rem; }
+            .options-grid { grid-template-columns: 1fr; } /* 1 Spalte auf Mobile */
+            .quiz-card { padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Endungen ergänzen</h1>
+    
+    <div class="intro">
+        <strong>Aufgabe:</strong> Ergänzen Sie die Endung des Partizips.<br>
+        Achten Sie auf das <strong>fett gedruckte Bezugswort</strong> (Kasus, Numerus, Genus).<br>
+        Wählen Sie die richtige Option.
+    </div>
+
+    <div class="status-bar">
+        <span>Frage <span id="current-q">1</span> von <span id="total-q">10</span></span>
+        <span id="score-display">Richtig: 0</span>
+    </div>
+
+    <div class="quiz-card" id="card">
+        <!-- Inhalt wird per JS geladen -->
+        <div class="sentence-box" id="sentence-area">
+            Lade...
+        </div>
+        <div class="options-grid" id="options-area">
+            <!-- Buttons -->
+        </div>
+    </div>
+
+    <div class="controls">
+        <button class="btn btn-reset" onclick="restartQuiz()">Neustart</button>
+        <button class="btn btn-next" id="btn-next" onclick="nextQuestion()">Nächste Frage</button>
+    </div>
+</div>
+
+<script>
+    // Daten für 10 Fragen
+    // sentencePart1: Text vor Lücke (inkl. Bezugswort)
+    // stem: Der Partizip-Stamm (z.B. читавш)
+    // sentencePart2: Text nach Lücke (Satzzeichen etc.)
+    // correct: Die richtige Endung
+    // options: Array mit 4 Endungen (Distraktoren)
+    // hint: Optionaler Hinweis (Kasus)
+    const questions = [
+        {
+            text: "Я вижу <span class='reference-word'>девушку</span>, читавш",
+            suffix: "", // Lücke
+            end: " книгу.",
+            correct: "ую",
+            options: ["ую", "ая", "ей", "ие"],
+            hint: "Akkusativ Singular Feminin"
+        },
+        {
+            text: "Мы говорили о <span class='reference-word'>студенте</span>, приехавш",
+            suffix: "",
+            end: " из Москвы.",
+            correct: "ем",
+            options: ["ем", "им", "его", "ему"],
+            hint: "Präpositiv Singular Maskulin"
+        },
+        {
+            text: "Вот <span class='reference-word'>документы</span>, лежавш",
+            suffix: "",
+            end: " на столе.",
+            correct: "ие",
+            options: ["ие", "ий", "их", "ими"],
+            hint: "Nominativ Plural"
+        },
+        {
+            text: "Нет <span class='reference-word'>человека</span>, знавш",
+            suffix: "",
+            end: " ответ.",
+            correct: "его",
+            options: ["его", "ему", "им", "ий"],
+            hint: "Genitiv Singular Maskulin"
+        },
+        {
+            text: "Я дал книгу <span class='reference-word'>подруге</span>, сидевш",
+            suffix: "",
+            end: " у окна.",
+            correct: "ей",
+            options: ["ей", "ую", "ая", "ею"],
+            hint: "Dativ Singular Feminin"
+        },
+        {
+            text: "Он говорил с <span class='reference-word'>людьми</span>, работавш",
+            suffix: "",
+            end: " здесь.",
+            correct: "ими",
+            options: ["ими", "их", "ие", "им"],
+            hint: "Instrumental Plural"
+        },
+        {
+            text: "Я не знаю <span class='reference-word'>женщину</span>, вошедш",
+            suffix: "",
+            end: " в комнату.",
+            correct: "ую",
+            options: ["ую", "ая", "ей", "ие"],
+            hint: "Akkusativ Singular Feminin"
+        },
+        {
+            text: "<span class='reference-word'>Поезд</span>, отошедш",
+            suffix: "",
+            end: " от станции, был скорым.",
+            correct: "ий",
+            options: ["ий", "ая", "ее", "ие"],
+            hint: "Nominativ Singular Maskulin"
+        },
+        {
+            text: "Мы живем в <span class='reference-word'>доме</span>, стоявш",
+            suffix: "",
+            end: " на горе.",
+            correct: "ем",
+            options: ["ем", "им", "его", "ему"],
+            hint: "Präpositiv Singular Maskulin"
+        },
+        {
+            text: "Это письмо от <span class='reference-word'>друга</span>, живш",
+            suffix: "",
+            end: " в Берлине.",
+            correct: "его",
+            options: ["его", "ему", "им", "ий"],
+            hint: "Genitiv Singular Maskulin"
+        }
+    ];
+
+    let currentIdx = 0;
+    let score = 0;
+    const sentenceArea = document.getElementById('sentence-area');
+    const optionsArea = document.getElementById('options-area');
+    const qCount = document.getElementById('current-q');
+    const totalCount = document.getElementById('total-q');
+    const scoreDisplay = document.getElementById('score-display');
+    const nextBtn = document.getElementById('btn-next');
+    const card = document.getElementById('card');
+
+    function initQuiz() {
+        totalCount.textContent = questions.length;
+        loadQuestion(0);
+    }
+
+    function loadQuestion(index) {
+        currentIdx = index;
+        qCount.textContent = index + 1;
+        nextBtn.style.display = 'none'; // Hide next button until answered
+        card.classList.remove('shake'); // Remove anim
+
+        const q = questions[index];
+
+        // 1. Satz bauen
+        // Wir bauen die Lücke als span ein
+        sentenceArea.innerHTML = `${q.text}<span class="gap" id="gap">___</span>${q.end}`;
+        
+        // Hinweis (optional, hier klein drunter)
+        // const hint = document.createElement('div');
+        // hint.style.fontSize = '0.9rem'; hint.style.color = '#888'; hint.style.marginTop = '10px';
+        // hint.textContent = `(${q.hint})`;
+        // sentenceArea.appendChild(hint);
+
+        // 2. Optionen bauen (Buttons)
+        optionsArea.innerHTML = '';
+        
+        // Mischen der Optionen
+        const shuffledOpts = [...q.options].sort(() => 0.5 - Math.random());
+
+        shuffledOpts.forEach(opt => {
+            const btn = document.createElement('button');
+            btn.className = 'opt-btn';
+            btn.textContent = `-${opt}`;
+            btn.onclick = () => checkAnswer(opt, q.correct, btn);
+            optionsArea.appendChild(btn);
+        });
+    }
+
+    function checkAnswer(selected, correct, btn) {
+        const gap = document.getElementById('gap');
+        const allBtns = document.querySelectorAll('.opt-btn');
+
+        if (selected === correct) {
+            // RICHTIG
+            gap.textContent = selected;
+            gap.className = 'gap correct';
+            
+            btn.className = 'opt-btn correct';
+            
+            // Score hoch
+            // Wir zählen nur, wenn es der erste Versuch war? 
+            // Hier vereinfacht: Wenn noch nicht gelöst, Punkt.
+            if(!nextBtn.style.display || nextBtn.style.display === 'none') {
+                score++;
+                scoreDisplay.textContent = `Richtig: ${score}`;
+            }
+
+            // Alle disablen
+            allBtns.forEach(b => b.classList.add('disabled'));
+            
+            // Weiter-Button zeigen
+            showNextButton();
+
+        } else {
+            // FALSCH
+            gap.textContent = selected;
+            gap.className = 'gap wrong';
+            
+            btn.className = 'opt-btn wrong';
+            btn.classList.add('disabled'); // Diesen Button deaktivieren
+            
+            // Wackel-Effekt auf Karte
+            card.classList.remove('shake');
+            void card.offsetWidth; // Trigger Reflow
+            card.classList.add('shake');
+        }
+    }
+
+    function showNextButton() {
+        if (currentIdx < questions.length - 1) {
+            nextBtn.textContent = "Nächste Frage";
+            nextBtn.style.display = 'block';
+        } else {
+            nextBtn.textContent = "Ergebnis anzeigen";
+            nextBtn.style.display = 'block';
+            nextBtn.onclick = showResults;
+        }
+    }
+
+    function nextQuestion() {
+        loadQuestion(currentIdx + 1);
+    }
+
+    function showResults() {
+        card.innerHTML = `
+            <h2>Fertig!</h2>
+            <p style="font-size:1.2rem;">Du hast <strong>${score}</strong> von <strong>${questions.length}</strong> Fragen beim ersten Versuch richtig beantwortet.</p>
+        `;
+        nextBtn.style.display = 'none';
+    }
+
+    function restartQuiz() {
+        currentIdx = 0;
+        score = 0;
+        scoreDisplay.textContent = "Richtig: 0";
+        // Seite neu laden oder Logik resetten
+        // Wir resetten Logik, um Flackern zu vermeiden
+        card.innerHTML = `
+            <div class="sentence-box" id="sentence-area">Lade...</div>
+            <div class="options-grid" id="options-area"></div>
+        `;
+        // Wir müssen die Referenzen neu holen, da innerHTML überschrieben wurde
+        // Einfacher: Seite neu laden? Nein, besser sauberer Reset.
+        location.reload(); 
+    }
+
+    // Start
+    initQuiz();
+
+</script>
+
+</body>
+</html>
