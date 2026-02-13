@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Russische Grammatik: Aktive Partizipien der Vergangenheit</title>
+    <!-- Polyfill für Touch Drag & Drop -->
+    <script src="https://cdn.jsdelivr.net/npm/drag-drop-touch@1.3.1/DragDropTouch.js"></script>
+    <style>
+        :root {
+            --primary: #3498db;
+            --primary-dark: #2980b9;
+            --success: #2ecc71;
+            --error: #e74c3c;
+            --bg-light: #f9f9f9;
+            --text-color: #333;
+            --border-radius: 8px;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: #f0f2f5;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            color: var(--primary-dark);
+            text-align: center;
+            border-bottom: 2px solid var(--primary);
+            padding-bottom: 10px;
+        }
+
+        h2 {
+            color: var(--primary);
+            margin-top: 30px;
+        }
+
+        h3 {
+            color: #555;
+            font-size: 1.1em;
+            margin-bottom: 15px;
+        }
+
+        .intro-box {
+            background-color: #e8f4fd;
+            border-left: 5px solid var(--primary);
+            padding: 15px;
+            margin-bottom: 30px;
+            border-radius: 4px;
+        }
+
+        .rule-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        .rule-table th, .rule-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        .rule-table th {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        /* Exercise Card Styles */
+        .exercise-card {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            transition: transform 0.2s;
+        }
+
+        .exercise-card:hover {
+            border-color: var(--primary-light);
+        }
+
+        .exercise-header {
+            font-weight: bold;
+            color: var(--primary-dark);
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        /* Controls */
+        .controls {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s;
+            color: white;
+        }
+
+        .btn-check { background-color: var(--primary); }
+        .btn-check:hover { background-color: var(--primary-dark); }
+        
+        .btn-reset { background-color: #95a5a6; }
+        .btn-reset:hover { background-color: #7f8c8d; }
+
+        .btn-solve { background-color: #f39c12; }
+        .btn-solve:hover { background-color: #d35400; }
+
+        /* Interaction Elements */
+        select {
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            font-size: 1em;
+            background: white;
+        }
+
+        /* Drag and Drop Styles */
+        .dnd-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: space-between;
+        }
+
+        .draggable-items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            background: #f0f0f0;
+            padding: 10px;
+            border-radius: 5px;
+            min-height: 50px;
+            width: 100%;
+        }
+
+        .draggable {
+            background: white;
+            border: 1px solid var(--primary);
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: grab;
+            user-select: none;
+            touch-action: none; /* Helps with touch DnD */
+        }
+
+        .draggable:active {
+            cursor: grabbing;
+        }
+
+        .drop-zone {
+            border: 2px dashed #ccc;
+            border-radius: 5px;
+            min-height: 40px;
+            min-width: 100px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 5px;
+            background: #fafafa;
+            margin: 0 5px;
+            vertical-align: middle;
+        }
+
+        .drop-zone.filled {
+            border-style: solid;
+            border-color: var(--primary);
+        }
+
+        /* Click Selection Styles */
+        .clickable-word {
+            cursor: pointer;
+            padding: 2px 5px;
+            margin: 0 2px;
+            border-radius: 3px;
+            border: 1px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .clickable-word:hover {
+            background-color: #e0e0e0;
+        }
+
+        .clickable-word.selected {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        /* Feedback Classes */
+        .correct {
+            border-color: var(--success) !important;
+            background-color: #d4edda !important;
+            color: #155724;
+        }
+
+        .wrong {
+            border-color: var(--error) !important;
+            background-color: #f8d7da !important;
+            color: #721c24;
+        }
+
+        .feedback-msg {
+            margin-top: 10px;
+            font-weight: bold;
+            display: none;
+        }
+        
+        /* Multiple Choice Custom */
+        .mc-option {
+            margin: 5px 0;
+            display: block;
+        }
+        
+        .mc-label {
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 4px;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .dnd-container {
+                flex-direction: column;
+            }
+            .controls {
+                flex-direction: column;
+            }
+            button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Russische Grammatik: Aktive Partizipien der Vergangenheit</h1>
+
+    <div class="intro-box">
+        <h2>Einführung</h2>
+        <p>Aktive Partizipien der Vergangenheit beschreiben eine Handlung, die das Subjekt selbst in der Vergangenheit ausgeführt hat. Sie ersetzen oft einen Relativsatz mit „который“ (der/die/das) + Vergangenheitsform.</p>
+        
+        <p><strong>Bildung:</strong> Man nimmt den Verbstamm der Vergangenheit (ohne -л) und fügt Suffixe hinzu:</p>
+        
+        <table class="rule-table">
+            <thead>
+                <tr>
+                    <th>Regel</th>
+                    <th>Suffix</th>
+                    <th>Beispiel</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Nach Vokalen</td>
+                    <td><strong>-вш-</strong></td>
+                    <td>читать → читал → чита<strong>вш</strong>ий</td>
+                </tr>
+                <tr>
+                    <td>Nach Konsonanten</td>
+                    <td><strong>-ш-</strong></td>
+                    <td>нести → нёс → нёс<strong>ш</strong>ий</td>
+                </tr>
+                <tr>
+                    <td>Reflexive Verben</td>
+                    <td><strong>-ся</strong> bleibt am Ende</td>
+                    <td>улыбаться → улыбал<strong>ся</strong> → улыба<strong>вш</strong>ий<strong>ся</strong></td>
+                </tr>
+            </tbody>
+        </table>
+        <p>Die Endungen (-ий, -ая, -ее, -ие) verhalten sich wie bei Adjektiven.</p>
+    </div>
+
+    <!-- Aufgabe 1: Multiple Choice Identification -->
+    <div class="exercise-card" id="ex1">
+        <span class="exercise-header">Aufgabe 1: Identifikation</span>
+        <h3>Welches Wort ist ein aktives Partizip der Vergangenheit?</h3>
+        <div class="mc-option">
+            <input type="radio" name="ex1_radio" id="ex1_opt1" value="wrong">
+            <label for="ex1_opt1" class="mc-label">делал</label>
+        </div>
+        <div class="mc-option">
+            <input type="radio" name="ex1_radio" id="ex1_opt2" value="correct">
+            <label for="ex1_opt2" class="mc-label">делавший</label>
+        </div>
+        <div class="mc-option">
+            <input type="radio" name="ex1_radio" id="ex1_opt3" value="wrong">
+            <label for="ex1_opt3" class="mc-label">сделает</label>
+        </div>
+        <div class="feedback-msg" id="ex1_feedback"></div>
+        <div class="controls">
+            <button class="btn-check" onclick="checkMC('ex1')">Überprüfen</button>
+            <button class="btn-reset" onclick="resetMC('ex1')">Zurücksetzen</button>
+            <button class="btn-solve" onclick="solveMC('ex1', 'ex1_opt2')">Lösung anzeigen</button>
+        </div>
+    </div>
+
+    <!-- Aufgabe 2: Suffix-Wahl -->
+    <div class="exercise-card" id="ex2">
+        <span class="exercise-header">Aufgabe 2: Suffix-Wahl</span>
+        <h3>Wählen Sie das richtige Suffix (-вш- oder -ш-) für die folgenden Verben.</h3>
+        <p>1. играть (играл) → Игра<select id="ex2_s1"><option value="">?</option><option value="вш">вш</option><option value="ш">ш</option></select>ий</p>
+        <p>2. расти (рос) → Рос<select id="ex2_s2"><option value="">?</option><option value="вш">вш</option><option value="ш">ш</option></select>ий</p>
+        <p>3. видеть (видел) → Виде<select id="ex2_s3"><option value="">?</option><option value="вш">вш</option><option value="ш">ш</option></select>ий</p>
+        <div class="feedback-msg" id="ex2_feedback"></div>
+        <div class="controls">
+            <button class="btn-check" onclick="checkSelect('ex2', ['вш', 'ш', 'вш'])">Überprüfen</button>
+            <button class="btn-reset" onclick="resetSelect('ex2')">Zurücksetzen</button>
+            <button class="btn-solve" onclick="solveSelect('ex2', ['вш', 'ш', 'вш'])">Lösung anzeigen</button>
+        </div>
+    </div>
+
+    <!-- Aufgabe 3: Drag & Drop Matching -->
+    <div class="exercise-card" id="ex3">
+        <span class="exercise-header">Aufgabe 3: Zuordnung</span>
+        <h3>Ordnen Sie das Partizip dem Infinitiv zu. Ziehen Sie die Wörter.</h3>
+        
+        <div class="draggable-items" id="ex3_source">
+            <!-- Items randomisiert, nicht mehr in der Reihenfolge 1, 2, 3 -->
+            <div class="draggable" draggable="true" data-id="2">пришедший</div>
+            <div class="draggable" draggable="true" data-id="3">могший</div>
+            <div class="draggable" draggable="true" data-id="1">читавший</div>
+        </div>
+        
+        <div style="margin-top: 20px;">
+            <p>1. читать: <span class="drop-zone" data-target="1"></span></p>
+            <p>2. прийти: <span class="drop-zone" data-target="2"></span></p>
+            <p>3. мочь: <span class="drop-zone" data-target="3"></span></p>
+        </div>
+
+        <div class="feedback-msg" id="ex3_feedback"></div>
+        <div class="controls">
+            <button class="btn-check" onclick="checkDnD('ex3')">Überprüfen</button>
+            <button class="btn-reset" onclick="resetDnD('ex3')">Zurücksetzen</button>
+            <button class="btn-solve" onclick="solveDnD('ex3')">Lösung anzeigen</button>
+        </div>
+    </div>
+
+    <!-- Aufgabe 4: Transformation (Multiple Choice) -->
+    <div class="exercise-card" id="ex4">
+        <span class="exercise-header">Aufgabe 4: Satzumformung</span>
+        <h3>Wählen Sie die korrekte Umformung für: „Студент, который изучал физику.“</h3>
+        <div class="mc-option">
+            <input type="radio" name="ex4_radio" id="ex4_opt1" value="wrong">
+            <label for="ex4_opt1" class="mc-label">Студент, изучающий физику.</label>
+        </div>
+        <div class="mc-option">
+            <input type="radio" name="ex4_radio" id="ex4_opt2" value="wrong">
+            <label for="ex4_opt2" class="mc-label">Студент, изучил физику.</label>
+        </div>
+        <div class="mc-option">
+            <input type="radio" name="ex4_radio" id="ex4_opt3" value="correct">
+            <label for="ex4_opt3" class="mc-label">Студент, изучавший физику.</label>
+        </div>
+        <div class="feedback-msg" id="ex4_feedback"></div>
+        <div class="controls">
+            <button class="btn-check" onclick="checkMC('ex4')">Überprüfen</button>
+            <button class="btn-reset" onclick="resetMC('ex4')">Zurücksetzen</button>
+            <button class="btn-solve" onclick="solveMC('ex4', 'ex4_opt3')">Lösung anzeigen</button>
+        </div>
+    </div>
+
+    <!-- Aufgabe 5: Reflexive Verben -->
+    <div class="exercise-card" id="ex5">
+        <span class="exercise-header">Aufgabe 5: Reflexive Verben</span>
+        <h3>Bilden Sie das Partizip von „вернуться“ (zurückkehren). Wählen Sie die korrekte Form.</h3>
+        <p>Человек, <select id="ex5_s1"><option value="">?</option><option value="wrong1">вернувшийся</option><option value="wrong2">вернувший</option><option value="correct">вернувшийся</option><option value="wrong3">вернулся</option></select> домой, был уставшим.</p>
+        <div class="feedback-msg" id="ex5_feedback"></div>
+        <div class="controls">
+            <button class="btn-check" onclick="checkSelect('ex5', ['correct'])">Überprüfen</button>
+            <button class="btn-reset" onclick="resetSelect('ex5')">Zurücksetzen</button>
+            <button class="btn-solve" onclick="solveSelect('ex5', ['correct'])">Lösung anzeigen</button>
+        </div>
+    </div>
+
+    <!-- Aufgabe 6: Text Highlighting -->
+    <div class="exercise-card" id="ex6">
+        <span class="exercise-header">Aufgabe 6: Partizipien finden</span>
+        <h3>Klicken Sie auf ALLE aktiven Partizipien der Vergangenheit im Text.</h3>
+        <div id="ex6_text">
+            Мы видели <span class="clickable-word" data-is-participle="false">человека</span>, 
+            <span class="clickable-word" data-is-participle="true">бежавшего</span> 
+            <span class="clickable-word" data-is-participle="false">по</span> 
+            <span class="clickable-word" data-is-participle="false">улице</span>. 
+            <span class="clickable-word" data-is-participle="true">Проходившая</span> 
+            <span class="clickable-word" data-is-participle="false">мимо</span> 
+            <span class="clickable-word" data-is-participle="false">женщина</span> 
+            <span class="clickable-word" data-is-participle="false">была</span> 
+            <span class="clickable-word" data-is-participle="true">удивленная</span> 
+            (Achtung: Passiv! Nicht klicken). 
+            <span class="clickable-word" data-is-participle="false">Мальчик</span>, 
+            <span class="clickable-word" data-is-participle="true">игравший</span> 
+            <span class="clickable-word" data-is-participle="false">в</span> 
+            <span class="clickable-word" data-is-participle="false">мяч</span>, 
+            <span class="clickable-word" data-is-participle="false">остановился</span>.
+        </div>
+        <div class="feedback-msg" id="ex6_feedback"></div>
+        <div class="controls">
+            <button class="btn-check" onclick="checkHighlight('ex6')">Überprüfen</button>
+            <button class="btn-reset" onclick="resetHighlight('ex6')">Zurücksetzen</button>
+            <button class="btn-solve" onclick="solveHighlight('ex6')">Lösung anzeigen</button>
+        </div>
+    </div>
+
+    <!-- Aufgabe 7: Kasus-Kongruenz (Drop Down) -->
+    <div class="exercise-card" id="ex7">
+        <span class="exercise-header">Aufgabe 7: Kasus-Anpassung</span>
+        <h3>Wählen Sie die richtige Endung passend zum Bezugswort.</h3>
+        <p>Я говорил с девушкой (Instrumental), ...</p>
+        <p>жи<select id="ex7_s1">
+            <option value="">?</option>
+            <option value="wrong1">жившая</option>
+            <option value="correct">жившей</option>
+            <option value="wrong2">жившую</option>
+        </select> в этом доме.</p>
+        <div class="feedback-msg" id="ex7_feedback"></div>
+        <div class="controls">
+            <button class="btn-check" onclick="checkSelect('ex7', ['correct'])">Überprüfen</button>
+            <button class="btn-reset" onclick="resetSelect('ex7')">Zurücksetzen</button>
+            <button class="btn-solve" onclick="solveSelect('ex7', ['correct'])">Lösung anzeigen</button>
+        </div>
+    </div>
+
+    <!-- Aufgabe 8: Drag & Drop Satzbau -->
+    <div class="exercise-card" id="ex8">
+        <span class="exercise-header">Aufgabe 8: Satzbau</span>
+        <h3>Bauen Sie den Satz: „Der Tourist, der das Ticket verloren hatte.“</h3>
+        
+        <div class="draggable-items" id="ex8_source">
+            <div class="draggable" draggable="true" data-id="subj">Турист,</div>
+            <div class="draggable" draggable="true" data-id="obj">билет.</div>
+            <div class="draggable" draggable="true" data-id="part">потерявший</div>
+        </div>
+        
+        <div style="margin-top: 20px; display: flex; gap: 5px; align-items: center; flex-wrap: wrap;">
+            <span class="drop-zone" data-target="subj"></span>
+            <span class="drop-zone" data-target="part"></span>
+            <span class="drop-zone" data-target="obj"></span>
+        </div>
+
+        <div class="feedback-msg" id="ex8_feedback"></div>
+        <div class="controls">
+            <button class="btn-check" onclick="checkDnD('ex8')">Überprüfen</button>
+            <button class="btn-reset" onclick="resetDnD('ex8')">Zurücksetzen</button>
+            <button class="btn-solve" onclick="solveDnD('ex8')">Lösung anzeigen</button>
+        </div>
+    </div>
+
+    <!-- Aufgabe 9: Irreguläre Verben -->
+    <div class="exercise-card" id="ex9">
+        <span class="exercise-header">Aufgabe 9: Unregelmäßige Formen</span>
+        <h3>Welches Partizip gehört zu „умереть“ (sterben)?</h3>
+        <div class="mc-option">
+            <input type="radio" name="ex9_radio" id="ex9_opt1" value="wrong">
+            <label for="ex9_opt1" class="mc-label">умиравший</label>
+        </div>
+        <div class="mc-option">
+            <input type="radio" name="ex9_radio" id="ex9_opt2" value="correct">
+            <label for="ex9_opt2" class="mc-label">умерший</label>
+        </div>
+        <div class="mc-option">
+            <input type="radio" name="ex9_radio" id="ex9_opt3" value="wrong">
+            <label for="ex9_opt3" class="mc-label">умеревший</label>
+        </div>
+        <div class="feedback-msg" id="ex9_feedback"></div>
+        <div class="controls">
+            <button class="btn-check" onclick="checkMC('ex9')">Überprüfen</button>
+            <button class="btn-reset" onclick="resetMC('ex9')">Zurücksetzen</button>
+            <button class="btn-solve" onclick="solveMC('ex9', 'ex9_opt2')">Lösung anzeigen</button>
+        </div>
+    </div>
+
+    <!-- Aufgabe 10: Lückentext Drag & Drop -->
+    <div class="exercise-card" id="ex10">
+        <span class="exercise-header">Aufgabe 10: Lückentext</span>
+        <h3>Setzen Sie die passenden Partizipien in den Text ein.</h3>
+        
+        <div class="draggable-items" id="ex10_source">
+            <div class="draggable" draggable="true" data-id="2">писавшая</div>
+            <div class="draggable" draggable="true" data-id="1">работавший</div>
+        </div>
+        
+        <div style="margin-top: 20px;">
+            <p>1. Женщина, <span class="drop-zone" data-target="2"></span> это письмо, моя мама.</p>
+            <p>2. Мой отец, <span class="drop-zone" data-target="1"></span> на заводе, теперь на пенсии.</p>
+        </div>
+
+        <div class="feedback-msg" id="ex10_feedback"></div>
+        <div class="controls">
+            <button class="btn-check" onclick="checkDnD('ex10')">Überprüfen</button>
+            <button class="btn-reset" onclick="resetDnD('ex10')">Zurücksetzen</button>
+            <button class="btn-solve" onclick="solveDnD('ex10')">Lösung anzeigen</button>
+        </div>
+    </div>
+
+    <!-- Aufgabe 11: Übersetzung -->
+    <div class="exercise-card" id="ex11">
+        <span class="exercise-header">Aufgabe 11: Bedeutung</span>
+        <h3>Was bedeutet: „Поезд, отошедший от станции“?</h3>
+        <div class="mc-option">
+            <input type="radio" name="ex11_radio" id="ex11_opt1" value="wrong">
+            <label for="ex11_opt1" class="mc-label">Der Zug, der am Bahnhof steht.</label>
+        </div>
+        <div class="mc-option">
+            <input type="radio" name="ex11_radio" id="ex11_opt2" value="wrong">
+            <label for="ex11_opt2" class="mc-label">Der Zug, der zum Bahnhof kommt.</label>
+        </div>
+        <div class="mc-option">
+            <input type="radio" name="ex11_radio" id="ex11_opt3" value="correct">
+            <label for="ex11_opt3" class="mc-label">Der Zug, der vom Bahnhof abgefahren ist.</label>
+        </div>
+        <div class="feedback-msg" id="ex11_feedback"></div>
+        <div class="controls">
+            <button class="btn-check" onclick="checkMC('ex11')">Überprüfen</button>
+            <button class="btn-reset" onclick="resetMC('ex11')">Zurücksetzen</button>
+            <button class="btn-solve" onclick="solveMC('ex11', 'ex11_opt3')">Lösung anzeigen</button>
+        </div>
+    </div>
+
+    <!-- Aufgabe 12: Aspekt (Vollendet vs. Unvollendet) -->
+    <div class="exercise-card" id="ex12">
+        <span class="exercise-header">Aufgabe 12: Aspekt-Wahl</span>
+        <h3>Wählen Sie das passende Partizip für den Kontext.</h3>
+        <p>Kontext: Ein einmaliges Ereignis (abgeschlossen).</p>
+        <p>„Человек, ... эту книгу, уже умер.“ (Der Mensch, der dieses Buch <em>geschrieben hat</em>...)</p>
+        <div class="mc-option">
+            <input type="radio" name="ex12_radio" id="ex12_opt1" value="wrong">
+            <label for="ex12_opt1" class="mc-label">писавший (unvollendet)</label>
+        </div>
+        <div class="mc-option">
+            <input type="radio" name="ex12_radio" id="ex12_opt2" value="correct">
+            <label for="ex12_opt2" class="mc-label">написавший (vollendet)</label>
+        </div>
+        <div class="feedback-msg" id="ex12_feedback"></div>
+        <div class="controls">
+            <button class="btn-check" onclick="checkMC('ex12')">Überprüfen</button>
+            <button class="btn-reset" onclick="resetMC('ex12')">Zurücksetzen</button>
+            <button class="btn-solve" onclick="solveMC('ex12', 'ex12_opt2')">Lösung anzeigen</button>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    /* ----- Drag and Drop Logic ----- */
+    let draggedItem = null;
+
+    document.querySelectorAll('.draggable').forEach(item => {
+        item.addEventListener('dragstart', function(e) {
+            draggedItem = this;
+            e.dataTransfer.setData('text/plain', this.dataset.id);
+            // Für Touch DragDropTouch Polyfill
+            e.dataTransfer.effectAllowed = 'move';
+        });
+    });
+
+    document.querySelectorAll('.drop-zone').forEach(zone => {
+        zone.addEventListener('dragover', function(e) {
+            e.preventDefault(); // Nötig, um Drop zu erlauben
+            e.dataTransfer.dropEffect = 'move';
+        });
+
+        zone.addEventListener('drop', function(e) {
+            e.preventDefault();
+            if (draggedItem) {
+                // Wenn schon etwas drin ist, zurück zum Source container
+                if (this.children.length > 0) {
+                    let existing = this.children[0];
+                    let sourceId = this.closest('.exercise-card').querySelector('.draggable-items').id;
+                    document.getElementById(sourceId).appendChild(existing);
+                }
+                this.appendChild(draggedItem);
+                this.classList.add('filled');
+                draggedItem = null;
+            }
+        });
+    });
+
+    /* ----- Generic Feedback Functions ----- */
+    function showFeedback(id, isCorrect, msg) {
+        const fbDiv = document.getElementById(id + '_feedback');
+        fbDiv.style.display = 'block';
+        fbDiv.textContent = msg || (isCorrect ? "Richtig!" : "Nicht ganz richtig. Versuche es noch einmal!");
+        fbDiv.className = 'feedback-msg ' + (isCorrect ? 'correct' : 'wrong');
+    }
+
+    function clearFeedback(id) {
+        const fbDiv = document.getElementById(id + '_feedback');
+        fbDiv.style.display = 'none';
+        fbDiv.className = 'feedback-msg';
+        
+        // Remove visual highlights
+        const card = document.getElementById(id);
+        card.querySelectorAll('.correct, .wrong').forEach(el => {
+            if(!el.classList.contains('feedback-msg')) {
+                el.classList.remove('correct', 'wrong');
+            }
+        });
+    }
+
+    /* ----- Exercise Type: Multiple Choice (Radio) ----- */
+    function checkMC(id) {
+        clearFeedback(id);
+        const radios = document.getElementsByName(id + '_radio');
+        let selected = null;
+        let label = null;
+        
+        for (let radio of radios) {
+            if (radio.checked) {
+                selected = radio;
+                label = document.querySelector(`label[for="${radio.id}"]`);
+                break;
+            }
+        }
+
+        if (!selected) {
+            showFeedback(id, false, "Bitte wähle eine Option aus.");
+            return;
+        }
+
+        if (selected.value === 'correct') {
+            label.classList.add('correct');
+            showFeedback(id, true);
+        } else {
+            label.classList.add('wrong');
+            showFeedback(id, false);
+        }
+    }
+
+    function resetMC(id) {
+        clearFeedback(id);
+        const radios = document.getElementsByName(id + '_radio');
+        for (let radio of radios) radio.checked = false;
+        document.getElementById(id).querySelectorAll('.mc-label').forEach(l => l.classList.remove('correct', 'wrong'));
+    }
+
+    function solveMC(id, correctId) {
+        resetMC(id);
+        const correctRadio = document.getElementById(correctId);
+        correctRadio.checked = true;
+        const label = document.querySelector(`label[for="${correctId}"]`);
+        label.classList.add('correct');
+        showFeedback(id, true, "Lösung angezeigt.");
+    }
+
+    /* ----- Exercise Type: Dropdown Select ----- */
+    function checkSelect(id, correctValues) {
+        clearFeedback(id);
+        const selects = document.getElementById(id).querySelectorAll('select');
+        let allCorrect = true;
+
+        selects.forEach((select, index) => {
+            if (select.value === correctValues[index]) {
+                select.classList.add('correct');
+            } else {
+                select.classList.add('wrong');
+                allCorrect = false;
+            }
+        });
+
+        showFeedback(id, allCorrect);
+    }
+
+    function resetSelect(id) {
+        clearFeedback(id);
+        const selects = document.getElementById(id).querySelectorAll('select');
+        selects.forEach(s => {
+            s.value = "";
+            s.classList.remove('correct', 'wrong');
+        });
+    }
+
+    function solveSelect(id, correctValues) {
+        resetSelect(id);
+        const selects = document.getElementById(id).querySelectorAll('select');
+        selects.forEach((select, index) => {
+            select.value = correctValues[index];
+            select.classList.add('correct');
+        });
+        showFeedback(id, true, "Lösung angezeigt.");
+    }
+
+    /* ----- Exercise Type: Drag and Drop ----- */
+    function checkDnD(id) {
+        clearFeedback(id);
+        const zones = document.getElementById(id).querySelectorAll('.drop-zone');
+        let allCorrect = true;
+        let anyFilled = false;
+
+        zones.forEach(zone => {
+            if (zone.children.length > 0) {
+                anyFilled = true;
+                const item = zone.children[0];
+                if (item.dataset.id === zone.dataset.target) {
+                    item.classList.add('correct');
+                } else {
+                    item.classList.add('wrong');
+                    allCorrect = false;
+                }
+            } else {
+                allCorrect = false;
+            }
+        });
+
+        if (!anyFilled) {
+            showFeedback(id, false, "Bitte ziehe die Elemente in die Lücken.");
+        } else {
+            showFeedback(id, allCorrect);
+        }
+    }
+
+    function resetDnD(id) {
+        clearFeedback(id);
+        const source = document.getElementById(id + '_source');
+        const zones = document.getElementById(id).querySelectorAll('.drop-zone');
+        
+        // Alle items sammeln und zurück in source schieben
+        const allItems = [];
+        zones.forEach(z => {
+            if(z.children.length > 0) allItems.push(z.children[0]);
+            z.classList.remove('filled');
+        });
+        // Auch items im source können class correct/wrong haben
+        source.querySelectorAll('.draggable').forEach(i => allItems.push(i));
+
+        // Mischen ist hier nicht nötig, aber wir stellen sicher, dass sie zurückgesetzt werden
+        allItems.forEach(item => {
+            item.classList.remove('correct', 'wrong');
+            source.appendChild(item);
+        });
+    }
+
+    function solveDnD(id) {
+        resetDnD(id);
+        const zones = document.getElementById(id).querySelectorAll('.drop-zone');
+        const source = document.getElementById(id + '_source');
+        
+        zones.forEach(zone => {
+            const targetId = zone.dataset.target;
+            const item = source.querySelector(`.draggable[data-id="${targetId}"]`);
+            if (item) {
+                zone.appendChild(item);
+                item.classList.add('correct');
+                zone.classList.add('filled');
+            }
+        });
+        showFeedback(id, true, "Lösung angezeigt.");
+    }
+
+    /* ----- Exercise Type: Click Highlighting ----- */
+    // Initialize listeners for Exercise 6
+    document.querySelectorAll('#ex6 .clickable-word').forEach(span => {
+        span.addEventListener('click', function() {
+            this.classList.toggle('selected');
+        });
+    });
+
+    function checkHighlight(id) {
+        clearFeedback(id);
+        const words = document.getElementById(id + '_text').querySelectorAll('.clickable-word');
+        let allCorrect = true;
+        let anySelected = false;
+
+        words.forEach(word => {
+            const isSelected = word.classList.contains('selected');
+            const shouldBeSelected = word.dataset.isParticiple === "true";
+
+            if (isSelected) {
+                anySelected = true;
+                if (shouldBeSelected) {
+                    word.classList.add('correct');
+                } else {
+                    word.classList.add('wrong');
+                    allCorrect = false;
+                }
+            } else if (shouldBeSelected) {
+                // Missed one
+                allCorrect = false;
+            }
+        });
+
+        if (!anySelected) {
+            showFeedback(id, false, "Bitte wähle Wörter aus.");
+        } else {
+            showFeedback(id, allCorrect, allCorrect ? "Perfekt! Alle Partizipien gefunden." : "Einige Fehler vorhanden.");
+        }
+    }
+
+    function resetHighlight(id) {
+        clearFeedback(id);
+        document.getElementById(id + '_text').querySelectorAll('.clickable-word').forEach(w => {
+            w.classList.remove('selected', 'correct', 'wrong');
+        });
+    }
+
+    function solveHighlight(id) {
+        resetHighlight(id);
+        const words = document.getElementById(id + '_text').querySelectorAll('.clickable-word');
+        words.forEach(word => {
+            if (word.dataset.isParticiple === "true") {
+                word.classList.add('selected');
+                word.classList.add('correct');
+            }
+        });
+        showFeedback(id, true, "Lösung angezeigt.");
+    }
+
+</script>
+
+</body>
+</html>
