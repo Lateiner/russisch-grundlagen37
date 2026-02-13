@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Russisch: Transformation (Который ersetzen)</title>
+    <style>
+        :root {
+            --primary: #3498db;
+            --primary-dark: #2980b9;
+            --success: #2ecc71;
+            --error: #e74c3c;
+            --bg: #f5f7fa;
+            --card-bg: #ffffff;
+            --text: #2c3e50;
+            --highlight: #fff3cd; /* Gelb für Hervorhebung */
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: var(--primary-dark);
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .intro {
+            background-color: #dbeafe;
+            border-left: 5px solid var(--primary);
+            padding: 15px;
+            margin-bottom: 30px;
+            border-radius: 4px;
+            color: #1e3a8a;
+        }
+
+        /* Progress */
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .progress-track {
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--success);
+            width: 0%;
+            transition: width 0.4s ease;
+        }
+
+        /* Challenge Card */
+        .card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Satz-Boxen */
+        .sentence-label {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #94a3b8;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .original-sentence {
+            font-size: 1.25rem;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #f1f5f9;
+            margin-bottom: 20px;
+        }
+
+        .clause-highlight {
+            background-color: #fee2e2; /* Rotlich für den Teil, der wegfällt */
+            color: #b91c1c;
+            padding: 2px 4px;
+            border-radius: 4px;
+            text-decoration: line-through; /* Durchgestrichen andeuten */
+            text-decoration-color: rgba(185, 28, 28, 0.4);
+            margin: 0 2px;
+        }
+
+        .ref-highlight {
+            background-color: #d1fae5; /* Grünlich für Bezugswort */
+            color: #065f46;
+            padding: 2px 4px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+
+        .target-sentence {
+            font-size: 1.35rem;
+            font-weight: 500;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Die Lücke */
+        .gap-box {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 150px;
+            height: 44px;
+            background-color: #f8fafc;
+            border: 2px dashed #cbd5e1;
+            border-radius: 8px;
+            color: var(--primary);
+            font-weight: bold;
+            padding: 0 15px;
+            transition: all 0.3s;
+        }
+
+        .gap-box.filled {
+            border-style: solid;
+            background-color: #eff6ff;
+            border-color: var(--primary);
+        }
+
+        .gap-box.correct {
+            background-color: #dcfce7;
+            border-color: var(--success);
+            color: #15803d;
+        }
+
+        .gap-box.wrong {
+            background-color: #fee2e2;
+            border-color: var(--error);
+            color: #b91c1c;
+            animation: shake 0.4s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        /* Optionen */
+        .options-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .opt-btn {
+            padding: 15px;
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            color: #475569;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 500;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+        }
+
+        .opt-btn:hover:not(:disabled) {
+            border-color: var(--primary);
+            color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(52, 152, 219, 0.15);
+        }
+
+        .opt-btn:disabled {
+            opacity: 0.6;
+            cursor: default;
+        }
+
+        /* Feedback Area */
+        .feedback {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            display: none;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+        .feedback.success { background: #dcfce7; color: #166534; }
+        .feedback.error { background: #fee2e2; color: #991b1b; }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            justify-content: center;
+            margin-top: 25px;
+        }
+
+        .next-btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 30px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.4);
+            transition: transform 0.2s;
+            display: none; /* Hidden until correct */
+        }
+
+        .next-btn:hover {
+            transform: translateY(-2px);
+            background-color: var(--primary-dark);
+        }
+
+        /* End Screen */
+        .end-screen {
+            text-align: center;
+            display: none;
+            padding: 40px;
+        }
+        .restart-btn {
+            background-color: #64748b;
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 600px) {
+            .card { padding: 20px; }
+            .original-sentence { font-size: 1.1rem; }
+            .target-sentence { font-size: 1.2rem; }
+            .options-container { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Satz-Transformation</h1>
+    
+    <div class="intro">
+        <strong>Aufgabe:</strong> Ersetzen Sie den Relativsatz (mit „который“) durch ein Partizip.<br>
+        Wählen Sie die Form, die im <strong>richtigen Fall</strong> (passend zum Bezugswort) steht.
+    </div>
+
+    <div id="game-ui">
+        <div class="progress-header">
+            <span>Fortschritt</span>
+            <span id="counter">1 / 10</span>
+        </div>
+        <div class="progress-track">
+            <div class="progress-fill" id="progress-bar"></div>
+        </div>
+
+        <div class="card">
+            <!-- Original Sentence -->
+            <div class="sentence-label">Originalsatz</div>
+            <div class="original-sentence" id="orig-sentence">
+                <!-- Dynamischer Inhalt -->
+            </div>
+
+            <!-- Target Sentence -->
+            <div class="sentence-label">Mit Partizip</div>
+            <div class="target-sentence" id="target-sentence">
+                <!-- Dynamischer Inhalt mit Lücke -->
+            </div>
+
+            <!-- Feedback -->
+            <div class="feedback" id="feedback-msg"></div>
+
+            <!-- Options -->
+            <div class="options-container" id="options-area">
+                <!-- Buttons -->
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="next-btn" id="next-btn" onclick="nextLevel()">Nächster Satz &rarr;</button>
+        </div>
+    </div>
+
+    <!-- End Screen -->
+    <div class="end-screen" id="end-screen">
+        <h2>🎉 Großartig!</h2>
+        <p>Sie haben alle 10 Sätze erfolgreich transformiert.</p>
+        <button class="restart-btn" onclick="restartGame()">Neustart</button>
+    </div>
+</div>
+
+<script>
+    /*
+      Daten:
+      origPre: Text vor dem Relativsatz
+      refWord: Das Bezugswort (wird grün markiert)
+      clause: Der Relativsatz (wird rot markiert/gestrichen)
+      origPost: Text nach dem Relativsatz (falls vorhanden)
+      
+      targetPre: Text vor der Lücke im Zielsatz
+      targetPost: Text nach der Lücke im Zielsatz
+      
+      correct: Die richtige Partizip-Form
+      distractors: Falsche Formen
+    */
+    const levels = [
+        {
+            origPre: "", refWord: "Студент", clause: ", который читал книгу,", origPost: " ушёл.",
+            targetPre: "Студент,", targetPost: "книгу, ушёл.",
+            correct: "читавший", distractors: ["читающий", "читавшем", "читавшая"]
+        },
+        {
+            origPre: "Я вижу ", refWord: "девушку", clause: ", которая смеялась.", origPost: "",
+            targetPre: "Я вижу", targetPost: "девушку.",
+            correct: "смеявшуюся", distractors: ["смеявшаяся", "смеявшийся", "смеявшейся"]
+        },
+        {
+            origPre: "Мы подошли к ", refWord: "дому", clause: ", который стоял на горе.", origPost: "",
+            targetPre: "Мы подошли к дому,", targetPost: "на горе.",
+            correct: "стоявшему", distractors: ["стоявший", "стоявшем", "стоявшемуся"]
+        },
+        {
+            origPre: "Нет ", refWord: "врача", clause: ", который лечил меня.", origPost: "",
+            targetPre: "Нет врача,", targetPost: "меня.",
+            correct: "лечившего", distractors: ["лечивший", "лечившему", "лечившим"]
+        },
+        {
+            origPre: "Она говорила с ", refWord: "людьми", clause: ", которые приехали.", origPost: "",
+            targetPre: "Она говорила с людьми,", targetPost: ".", // Punkt am Ende
+            correct: "приехавшими", distractors: ["приехавшие", "приехавших", "приехавшим"]
+        },
+        {
+            origPre: "", refWord: "Письмо", clause: ", которое лежало на столе,", origPost: " было важным.",
+            targetPre: "Письмо,", targetPost: "на столе, было важным.",
+            correct: "лежавшее", distractors: ["лежавшая", "лежавший", "лежавшем"]
+        },
+        {
+            origPre: "Я думаю о ", refWord: "друге", clause: ", который жил там.", origPost: "",
+            targetPre: "Я думаю о друге,", targetPost: "там.",
+            correct: "жившем", distractors: ["жившим", "жившего", "живший"]
+        },
+        {
+            origPre: "Мы встретили ", refWord: "туристов", clause: ", которые потеряли карту.", origPost: "",
+            targetPre: "Мы встретили туристов,", targetPost: "карту.",
+            correct: "потерявших", distractors: ["потерявшие", "потерявшими", "потерявший"]
+        },
+        {
+            origPre: "", refWord: "Поезд", clause: ", который отошёл от станции,", origPost: " остановился.",
+            targetPre: "Поезд,", targetPost: "от станции, остановился.",
+            correct: "отошедший", distractors: ["отошедшее", "отошедшем", "отошедшую"]
+        },
+        {
+            origPre: "Он был доволен ", refWord: "работой", clause: ", которую сделал.", origPost: "",
+            targetPre: "Он был доволен работой,", targetPost: ".", // Achtung: Hier Ref auf Subjekt (er hat gemacht), aber Partizip bezogen auf Arbeit? Nein!
+            // Satz: "Er war zufrieden mit der Arbeit, die er gemacht hat." -> "Er war zufrieden mit der (von ihm) gemachten Arbeit." (Das ist Passiv!)
+            // Korrektur für AKTIV Partizip: Das Bezugswort muss das Subjekt der Handlung sein.
+            // Besser: "Он поблагодарил друга, который помог ему." (Er dankte dem Freund, der ihm half.)
+            origPre: "Он поблагодарил ", refWord: "друга", clause: ", который помог ему.", origPost: "",
+            targetPre: "Он поблагодарил друга,", targetPost: "ему.",
+            correct: "помогшего", distractors: ["помогший", "помогшему", "помогшим"] 
+            // 'помогший' ist selten aber grammatikalisch existent für 'помочь'.
+        }
+    ];
+
+    let currentIdx = 0;
+    
+    // Elements
+    const elOrigSentence = document.getElementById('orig-sentence');
+    const elTargetSentence = document.getElementById('target-sentence');
+    const elOptions = document.getElementById('options-area');
+    const elFeedback = document.getElementById('feedback-msg');
+    const elNextBtn = document.getElementById('next-btn');
+    const elCounter = document.getElementById('counter');
+    const elProgressBar = document.getElementById('progress-bar');
+    const elGameUI = document.getElementById('game-ui');
+    const elEndScreen = document.getElementById('end-screen');
+
+    function initGame() {
+        currentIdx = 0;
+        elGameUI.style.display = 'block';
+        elEndScreen.style.display = 'none';
+        loadLevel(0);
+    }
+
+    function loadLevel(idx) {
+        const data = levels[idx];
+        
+        // Progress
+        elCounter.textContent = `${idx + 1} / ${levels.length}`;
+        elProgressBar.style.width = `${(idx / levels.length) * 100}%`;
+
+        // Render Original Sentence
+        // Struktur: Text <span ref>Bezugswort</span> <span clause>Relativsatz</span> Text
+        elOrigSentence.innerHTML = `
+            ${data.origPre}
+            <span class="ref-highlight">${data.refWord}</span>
+            <span class="clause-highlight">${data.clause}</span>
+            ${data.origPost}
+        `;
+
+        // Render Target Sentence with GAP
+        // Struktur: Text <span ref>Bezugswort</span> <div gap></div> Text
+        // Um das Bezugswort auch im Zielsatz zu highlighten, müssen wir targetPre analysieren oder es einfach dort lassen.
+        // Einfachheitshalber zeigen wir targetPre normal an, aber wir könnten das letzte Wort bold machen.
+        
+        // Wir bauen die Lücke ein
+        elTargetSentence.innerHTML = `
+            <span>${data.targetPre}</span>
+            <div class="gap-box" id="gap">???</div>
+            <span>${data.targetPost}</span>
+        `;
+
+        // Feedback & Buttons Reset
+        elFeedback.style.display = 'none';
+        elNextBtn.style.display = 'none';
+        elOptions.innerHTML = '';
+
+        // Optionen erstellen (Mischen)
+        const allOptions = [data.correct, ...data.distractors].sort(() => 0.5 - Math.random());
+
+        allOptions.forEach(opt => {
+            const btn = document.createElement('button');
+            btn.className = 'opt-btn';
+            btn.textContent = opt;
+            btn.onclick = () => checkAnswer(opt, data.correct, btn);
+            elOptions.appendChild(btn);
+        });
+    }
+
+    function checkAnswer(selected, correct, btnElement) {
+        const gap = document.getElementById('gap');
+        
+        if (selected === correct) {
+            // Richtig
+            gap.textContent = selected;
+            gap.className = 'gap-box filled correct';
+            
+            // Feedback
+            elFeedback.textContent = "Richtig! Das Partizip passt im Kasus zum Bezugswort.";
+            elFeedback.className = "feedback success";
+            elFeedback.style.display = 'block';
+
+            // Buttons deaktivieren
+            const allBtns = document.querySelectorAll('.opt-btn');
+            allBtns.forEach(b => b.disabled = true);
+
+            // Nächster Button
+            if (currentIdx < levels.length - 1) {
+                elNextBtn.style.display = 'inline-block';
+            } else {
+                elNextBtn.textContent = "Ergebnis anzeigen";
+                elNextBtn.style.display = 'inline-block';
+                elProgressBar.style.width = '100%';
+            }
+
+        } else {
+            // Falsch
+            gap.textContent = selected;
+            gap.className = 'gap-box filled wrong'; // Löst Shake-Animation aus
+            
+            // Kleines Timeout, um Klasse zu entfernen für erneuten Shake
+            setTimeout(() => {
+                gap.className = 'gap-box filled';
+            }, 500);
+
+            // Feedback (optional, oder einfach nur rot blinken lassen)
+            // Wir lassen den Button rot werden
+            btnElement.style.borderColor = '#e74c3c';
+            btnElement.style.color = '#e74c3c';
+        }
+    }
+
+    function nextLevel() {
+        if (currentIdx < levels.length - 1) {
+            currentIdx++;
+            loadLevel(currentIdx);
+        } else {
+            showEndScreen();
+        }
+    }
+
+    function showEndScreen() {
+        elGameUI.style.display = 'none';
+        elEndScreen.style.display = 'block';
+    }
+
+    function restartGame() {
+        initGame();
+        elNextBtn.textContent = "Nächster Satz \u2192";
+    }
+
+    // Start
+    initGame();
+
+</script>
+
+</body>
+</html>
